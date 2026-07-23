@@ -1,0 +1,925 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>سامانه خودارزیابی شهر سالم</title>
+<meta name="description" content="ابزار تعاملی خودارزیابی برنامه شهر سالم بر اساس ۹ حوزه و ۸۰ شاخص">
+<meta name="theme-color" content="#0E7C61">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --primary:#0E7C61;
+  --primary-dark:#0A5C48;
+  --primary-light:#E7F5F0;
+  --accent:#C98A1B;
+  --accent-light:#FBF1DE;
+  --bg:#FAF8F4;
+  --card:#FFFFFF;
+  --text:#20302B;
+  --text-mute:#5B6D66;
+  --border:#E4E0D6;
+  --radius:14px;
+  --shadow:0 2px 10px rgba(20,40,35,.06);
+  --shadow-lg:0 10px 30px rgba(20,40,35,.12);
+  --red:#C94B3F; --red-bg:#FBEAE8;
+  --orange:#D98A1F; --orange-bg:#FDF2DE;
+  --green:#2E9E5B; --green-bg:#E8F6ED;
+  --yellow:#C9A227; --yellow-bg:#FBF6DE;
+}
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;}
+body{
+  font-family:'Vazirmatn',Tahoma,sans-serif;
+  background:var(--bg);
+  color:var(--text);
+  direction:rtl;
+  line-height:1.8;
+  padding-bottom:60px;
+}
+button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit;}
+input{font-family:inherit;}
+
+/* ===== Header ===== */
+.app-header{
+  background:linear-gradient(135deg,var(--primary) 0%,var(--primary-dark) 100%);
+  color:#fff;
+  padding:22px 20px 70px;
+  position:relative;
+}
+.header-top{
+  max-width:980px;margin:0 auto;
+  display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap;
+}
+.header-title h1{margin:0;font-size:1.5rem;font-weight:800;}
+.header-title p{margin:4px 0 0;font-size:.85rem;opacity:.85;}
+.header-actions{display:flex;gap:8px;flex-wrap:wrap;}
+.btn{
+  display:inline-flex;align-items:center;gap:6px;
+  padding:9px 14px;border-radius:10px;font-size:.85rem;font-weight:600;
+  background:rgba(255,255,255,.15);color:#fff;transition:.15s;
+  white-space:nowrap;
+}
+.btn:hover{background:rgba(255,255,255,.27);}
+.btn-solid{background:var(--accent);color:#2b1d02;}
+.btn-solid:hover{background:#b87c18;}
+.btn-outline{background:transparent;border:1.5px solid rgba(255,255,255,.5);}
+.btn-outline:hover{background:rgba(255,255,255,.12);}
+
+.date-row{
+  max-width:980px;margin:10px auto 0;
+  display:flex;align-items:center;gap:10px;flex-wrap:wrap;
+  background:rgba(255,255,255,.12);
+  border-radius:12px;padding:10px 14px;
+}
+.date-row label{font-size:.82rem;opacity:.9;}
+#dateDisplay{
+  background:#fff;color:var(--text);border-radius:8px;padding:7px 12px;
+  font-size:.85rem;font-weight:600;min-width:150px;text-align:center;
+}
+#assessorName, #cityName{
+  background:rgba(255,255,255,.9);color:var(--text);border-radius:8px;padding:7px 12px;
+  font-size:.85rem;border:none;min-width:160px;
+}
+#assessorName::placeholder, #cityName::placeholder{color:#8a9a94;}
+
+/* ===== Print-only report header ===== */
+.print-header{display:none;}
+
+/* ===== Dashboard ===== */
+.dashboard{
+  max-width:980px;margin:0px auto 15px;padding:0 20px;
+  display:grid;grid-template-columns:auto 1fr;gap:20px;
+}
+.gauge-card{
+  background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow-lg);
+  padding:18px;display:flex;flex-direction:column;align-items:center;gap:6px;min-width:180px;
+}
+.gauge-wrap{position:relative;width:150px;height:150px;}
+.gauge-wrap svg{transform:rotate(-90deg);}
+.gauge-center{
+  position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;
+}
+.gauge-center .score{font-size:1.6rem;font-weight:800;}
+.gauge-center .max{font-size:.75rem;color:var(--text-mute);}
+.band-pill{
+  margin-top:4px;padding:5px 14px;border-radius:20px;font-size:.8rem;font-weight:700;
+}
+.stats-card{
+  background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow-lg);
+  padding:18px;display:flex;flex-direction:column;justify-content:center;gap:8px;
+}
+.stat-line{display:flex;justify-content:space-between;align-items:center;font-size:.88rem;}
+.stat-line b{font-size:1rem;}
+.progress-track{height:9px;background:var(--border);border-radius:6px;overflow:hidden;}
+.progress-fill{height:100%;background:var(--primary);border-radius:6px;transition:width .3s;}
+.band-analysis{font-size:.82rem;color:var(--text-mute);border-top:1px dashed var(--border);padding-top:10px;}
+
+/* ===== Toolbar ===== */
+.toolbar{
+  max-width:980px;margin:0 auto 14px;padding:0 20px;
+  display:flex;gap:10px;flex-wrap:wrap;align-items:center;
+}
+#searchBox{
+  flex:1;min-width:200px;padding:10px 14px;border:1.5px solid var(--border);border-radius:10px;
+  font-size:.88rem;background:var(--card);
+}
+#searchBox:focus{outline:none;border-color:var(--primary);}
+.filter-chip{
+  padding:8px 12px;border-radius:9px;font-size:.8rem;border:1.5px solid var(--border);background:var(--card);
+  color:var(--text-mute);font-weight:600;
+}
+.filter-chip.active{background:var(--primary);color:#fff;border-color:var(--primary);}
+
+/* ===== Domains ===== */
+#domainsContainer{max-width:980px;margin:0 auto;padding:0 20px;display:flex;flex-direction:column;gap:14px;}
+.domain-card{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden;}
+.domain-header{
+  display:flex;align-items:center;gap:12px;padding:16px 18px;cursor:pointer;
+  border-right:5px solid var(--primary);
+}
+.domain-icon{font-size:1.4rem;}
+.domain-title{flex:1;}
+.domain-title h3{margin:0;font-size:1rem;font-weight:700;}
+.domain-title span{font-size:.78rem;color:var(--text-mute);}
+.domain-score{font-size:.85rem;font-weight:700;color:var(--primary);white-space:nowrap;}
+.domain-chevron{transition:transform .2s;color:var(--text-mute);}
+.domain-card.open .domain-chevron{transform:rotate(180deg);}
+.domain-body{max-height:0;overflow:hidden;transition:max-height .25s ease;}
+.domain-card.open .domain-body{max-height:none;}
+.domain-mini-track{height:5px;background:var(--border);}
+.domain-mini-fill{height:100%;background:var(--primary);}
+
+.item{border-top:1px solid var(--border);padding:14px 18px;}
+.item-head{display:flex;align-items:flex-start;gap:10px;cursor:pointer;}
+.item-num{
+  flex-shrink:0;width:26px;height:26px;border-radius:50%;background:var(--primary-light);color:var(--primary);
+  display:flex;align-items:center;justify-content:center;font-size:.75rem;font-weight:700;
+}
+.item-text{flex:1;font-size:.88rem;}
+.item-status{flex-shrink:0;}
+.status-dot{width:10px;height:10px;border-radius:50%;background:var(--border);}
+.status-dot.s0{background:var(--red);}
+.status-dot.s1{background:var(--orange);}
+.status-dot.s2{background:var(--green);}
+
+.item-options{display:grid;grid-template-columns:1fr;gap:8px;margin-top:12px;}
+.opt{
+  display:flex;align-items:flex-start;gap:10px;padding:10px 12px;border-radius:10px;
+  border:1.5px solid var(--border);font-size:.82rem;transition:.12s;text-align:right;
+}
+.opt:hover{border-color:var(--text-mute);}
+.opt-badge{
+  flex-shrink:0;width:24px;height:24px;border-radius:7px;display:flex;align-items:center;justify-content:center;
+  font-weight:800;font-size:.78rem;color:#fff;
+}
+.opt.opt0{background:var(--red-bg);} .opt.opt0 .opt-badge{background:var(--red);}
+.opt.opt1{background:var(--orange-bg);} .opt.opt1 .opt-badge{background:var(--orange);}
+.opt.opt2{background:var(--green-bg);} .opt.opt2 .opt-badge{background:var(--green);}
+.opt.selected{outline:2.5px solid var(--text);outline-offset:1px;}
+
+/* ===== Band guide ===== */
+.guide-section{max-width:980px;margin:26px auto;padding:0 20px;}
+.guide-section h2{font-size:1.05rem;margin-bottom:12px;}
+.guide-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;}
+.guide-card{background:var(--card);border-radius:12px;box-shadow:var(--shadow);padding:14px;border-top:5px solid var(--border);}
+.guide-card.b-red{border-color:var(--red);}
+.guide-card.b-orange{border-color:var(--orange);}
+.guide-card.b-yellow{border-color:var(--yellow);}
+.guide-card.b-green{border-color:var(--green);}
+.guide-card h4{margin:0 0 4px;font-size:.9rem;}
+.guide-card .range{font-size:.75rem;color:var(--text-mute);margin-bottom:8px;}
+.guide-card p{font-size:.78rem;color:var(--text-mute);margin:0;}
+.guide-card.current{box-shadow:var(--shadow-lg);transform:translateY(-2px);}
+
+.reco-box{
+  max-width:980px;margin:0 auto 26px;padding:16px 20px;
+}
+.reco-card{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);padding:18px;border-right:5px solid var(--primary);}
+.reco-card h3{margin:0 0 10px;font-size:.95rem;}
+.reco-card ul{margin:0;padding-inline-start:20px;font-size:.83rem;color:var(--text-mute);display:flex;flex-direction:column;gap:6px;}
+
+/* ===== Calendar popup ===== */
+.cal-popup{
+  position:absolute;z-index:50;background:#fff;border-radius:12px;box-shadow:var(--shadow-lg);
+  padding:14px;width:260px;color:var(--text);display:none;
+}
+.cal-popup.show{display:block;}
+.cal-nav{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;}
+.cal-nav button{font-size:1rem;padding:4px 8px;border-radius:6px;}
+.cal-nav button:hover{background:var(--primary-light);}
+.cal-title{font-weight:700;font-size:.88rem;}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;text-align:center;}
+.cal-grid .dow{font-size:.68rem;color:var(--text-mute);padding:4px 0;}
+.cal-day{padding:6px 0;border-radius:7px;font-size:.78rem;}
+.cal-day:hover{background:var(--primary-light);}
+.cal-day.today{border:1.5px solid var(--primary);}
+.cal-day.selected{background:var(--primary);color:#fff;}
+.cal-day.empty{visibility:hidden;}
+
+/* ===== Modal ===== */
+.overlay{
+  position:fixed;inset:0;background:rgba(20,30,28,.5);display:none;align-items:center;justify-content:center;
+  z-index:100;padding:20px;
+}
+.overlay.show{display:flex;}
+.modal{background:#fff;border-radius:16px;max-width:420px;width:100%;max-height:80vh;overflow:auto;padding:20px;}
+.modal h3{margin:0 0 14px;}
+.modal-list{display:flex;flex-direction:column;gap:8px;margin-bottom:14px;}
+.modal-item{
+  display:flex;justify-content:space-between;align-items:center;padding:10px 12px;
+  border:1.5px solid var(--border);border-radius:10px;font-size:.85rem;
+}
+.modal-item button{color:var(--red);font-size:.78rem;}
+.modal-item .load-btn{color:var(--primary);font-weight:700;cursor:pointer;}
+.modal-empty{color:var(--text-mute);font-size:.85rem;text-align:center;padding:20px 0;}
+.modal-close{width:100%;padding:10px;background:var(--primary);color:#fff;border-radius:10px;font-weight:700;}
+
+/* ===== Toast ===== */
+#toast{
+  position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(20px);
+  background:#20302B;color:#fff;padding:11px 20px;border-radius:10px;font-size:.85rem;
+  opacity:0;transition:.25s;z-index:200;pointer-events:none;
+}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+footer.app-footer{
+  text-align:center;color:var(--text-mute);font-size:.78rem;margin-top:20px;
+}
+
+@media(max-width:640px){
+  .dashboard{grid-template-columns:1fr;}
+  .header-top{flex-direction:column;}
+}
+
+@media print{
+  .app-header,.toolbar,.btn,#toast,.overlay,.cal-popup,.item-options{display:none!important;}
+  .domain-body{max-height:none!important;}
+  body{background:#fff;}
+  .print-header{
+    display:flex!important;justify-content:space-between;align-items:flex-start;gap:20px;
+    padding:0 20px 14px;margin:0 auto 10px;max-width:980px;
+    border-bottom:2px solid var(--primary);
+  }
+  .print-header h1{margin:0 0 6px;font-size:1.25rem;color:var(--primary-dark);}
+  .print-header .print-sub{font-size:.8rem;color:var(--text-mute);}
+  .print-header-info{font-size:.85rem;text-align:left;line-height:1.9;white-space:nowrap;}
+  .print-header-info b{color:var(--text);}
+}
+
+</style>
+</head>
+<body>
+<div id="app">
+
+  <div class="print-header" id="printHeader">
+    <div>
+      <h1>🏙️ سامانه خودارزیابی شهر سالم</h1>
+      <div class="print-sub">ارزیابی تعاملی بر اساس ۹ حوزه و ۸۰ شاخص برنامه شهر سالم</div>
+    </div>
+    <div class="print-header-info">
+      <div>نام شهر: <b id="printCity">—</b></div>
+      <div>نام ارزیاب: <b id="printAssessor">—</b></div>
+      <div>تاریخ ارزیابی: <b id="printDate">—</b></div>
+      <div>امتیاز کل: <b id="printScore">—</b></div>
+    </div>
+  </div>
+
+  <header class="app-header">
+    <div class="header-top">
+      <div class="header-title">
+        <h1>🏙️ سامانه خودارزیابی شهر سالم</h1>
+        <p>ارزیابی تعاملی بر اساس ۹ حوزه و ۸۰ شاخص برنامه شهر سالم</p>
+      </div>
+      <div class="header-actions">
+        <button class="btn btn-solid" id="saveBtn">💾 ذخیره ارزیابی</button>
+        <button class="btn" id="loadBtn">📂 بازکردن ارزیابی</button>
+        <button class="btn btn-outline" id="printBtn">🖨️ چاپ</button>
+        <button class="btn btn-outline" id="resetBtn">♻️ شروع مجدد</button>
+      </div>
+    </div>
+    <div class="date-row">
+      <label>نام شهر:</label>
+      <input type="text" id="cityName" placeholder="نام شهر">
+      <label>ارزیاب:</label>
+      <input type="text" id="assessorName" placeholder="نام ارزیاب">
+      <label>تاریخ ارزیابی:</label>
+      <div style="position:relative;">
+        <div id="dateDisplay"></div>
+        <div class="cal-popup" id="calPopup">
+          <div class="cal-nav">
+            <button id="calPrev">‹</button>
+            <span class="cal-title" id="calTitle"></span>
+            <button id="calNext">›</button>
+          </div>
+          <div class="cal-grid" id="calGrid"></div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <div class="dashboard">
+    <div class="gauge-card">
+      <div class="gauge-wrap">
+        <svg width="150" height="150" viewBox="0 0 130 130">
+          <circle cx="65" cy="65" r="54" fill="none" stroke="#E4E0D6" stroke-width="12"/>
+          <circle id="gaugeRing" cx="65" cy="65" r="54" fill="none" stroke="#0E7C61" stroke-width="12"
+                  stroke-linecap="round" style="transition:stroke-dashoffset .4s, stroke .3s;"/>
+        </svg>
+        <div class="gauge-center">
+          <span class="score" id="gaugeScore">۰</span>
+          <span class="max">از ۱۶۰</span>
+        </div>
+      </div>
+      <div class="band-pill" id="bandPill">شروع نشده</div>
+    </div>
+    <div class="stats-card">
+      <div class="stat-line"><span>شاخص‌های پاسخ داده شده</span><span id="answeredStat"><b>۰ / ۸۰</b></span></div>
+      <div class="progress-track"><div class="progress-fill" id="progressFill" style="width:0%;"></div></div>
+      <div class="stat-line"><span>درصد پیشرفت</span><span id="progressPct"><b>۰٪</b></span></div>
+      <div class="band-analysis" id="bandAnalysis">برای مشاهده تحلیل، ارزیابی را آغاز کنید.</div>
+    </div>
+  </div>
+
+  <div class="toolbar">
+    <input type="text" id="searchBox" placeholder="جستجوی شاخص‌ها...">
+    <button class="filter-chip active" data-filter="all">همه</button>
+    <button class="filter-chip" data-filter="answered">پاسخ داده‌شده</button>
+    <button class="filter-chip" data-filter="unanswered">پاسخ‌ نداده</button>
+  </div>
+
+  <main id="domainsContainer"></main>
+
+  <section class="guide-section">
+    <h2>راهنمای امتیاز کسب‌شده</h2>
+    <div class="guide-grid" id="guideGrid"></div>
+  </section>
+
+  <section class="reco-box">
+    <div class="reco-card">
+      <h3 id="recoTitle">توصیه‌ها</h3>
+      <ul id="recoList"></ul>
+    </div>
+  </section>
+  
+  <footer class="app-footer">
+    <span>سامانه خودارزیابی شهر سالم</span> · <span>© ۱۴۰۵</span>
+  </footer>
+</div>
+
+<div class="overlay" id="modalOverlay">
+  <div class="modal">
+    <h3>ارزیابی‌های ذخیره‌شده</h3>
+    <div class="modal-list" id="modalList"></div>
+    <button class="modal-close" id="modalCloseBtn">بستن</button>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+// Deploy HealthyCityGoogleAppsScript.gs as a Web App, then paste its /exec URL here.
+const GOOGLE_SHEETS_WEB_APP_URL = 'PASTE_YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL_HERE';
+
+const DATA = {"domains": [{"title": "حوزه ۱: سازمان‌دهی و بسیج جامعه (۷ شاخص‌)", "items": [{"num": 1, "text": "آموزش سرخوشه‌ها/داوطلبین در نیازسنجی، اولویت‌بندی، جمع‌آوری داده، پایش و گزارش‌دهی", "s0": "آموزشی برگزار نشده", "s1": "آموزش جزئی/غیرمنظم بدون مستندسازی کامل", "s2": "آموزش کامل و مستمر با مستندات و توان عملیاتی داوطلبین"}, {"num": 2, "text": "تشکیل رسمی کمیته هماهنگی شهرسالم + ثبت به‌عنوان سازمان مردم‌نهاد + تعیین وظایف اعضا", "s0": "تشکیل نشده", "s1": "تشکیل شده اما ثبت رسمی نشده یا وظایف اعضا مشخص نیست", "s2": "تشکیل، ثبت رسمی و تعیین شفاف وظایف اعضا"}, {"num": 3, "text": "مشارکت فعال سرخوشه‌ها در برنامه‌ریزی اجتماعی/بهداشتی و تضمین ارائه خدمات", "s0": "مشارکتی وجود ندارد", "s1": "مشارکت محدود/موردی", "s2": "مشارکت فعال و مستمر با تضمین ارائه خدمات"}, {"num": 4, "text": "پایش پروژه‌های اقتصادی‌اجتماعی توسط کمیته + ثبت دستاوردها/چالش‌ها + ارائه راهکار", "s0": "پایش انجام نمی‌شود", "s1": "پایش ناقص یا بدون ثبت مستند", "s2": "پایش نظام‌مند با ثبت و ارائه راهکار محلی"}, {"num": 5, "text": "برقراری ارتباط کمیته با شرکای بالقوه توسعه منطقه", "s0": "ارتباطی برقرار نشده", "s1": "تلاش‌های اولیه/محدود", "s2": "شبکه‌سازی فعال و مستمر با شرکا"}, {"num": 6, "text": "تأسیس مرکز عمومی جهت برنامه‌ها و آموزش‌های عمومی", "s0": "تأسیس نشده", "s1": "موجود اما ناقص/کم‌کاربرد", "s2": "تأسیس و بهره‌برداری فعال"}, {"num": 7, "text": "تشکیل و ثبت گروه‌های زنان و جوانان + مشارکت در مداخلات توسعه محلی", "s0": "تشکیل نشده", "s1": "تشکیل شده، مشارکت محدود", "s2": "تشکیل، ثبت و مشارکت فعال"}], "icon": "🤝"}, {"title": "حوزه ۲: همکاری و مشارکت بین‌بخشی (۷ شاخص‌)", "items": [{"num": 8, "text": "معرفی اعضای کمیته از بخش‌های مختلف", "s0": "معرفی نشده", "s1": "معرفی جزئی/تک‌بخشی", "s2": "معرفی کامل از تمام بخش‌های ذی‌ربط"}, {"num": 9, "text": "تشکیل کمیته زیر نظر شهردار/فرماندار با نمایندگان سازمانی + ثبت صورتجلسات", "s0": "تشکیل نشده", "s1": "تشکیل شده، ثبت صورتجلسه ناقص", "s2": "تشکیل رسمی + ثبت و گزارش کامل صورتجلسات"}, {"num": 10, "text": "انتخاب هماهنگ‌کننده برنامه + تأمین امکانات فیزیکی", "s0": "انتخاب نشده", "s1": "انتخاب شده، امکانات ناکافی", "s2": "انتخاب هماهنگ‌کننده و تأمین کامل امکانات"}, {"num": 11, "text": "برگزاری جلسات مشترک تیم بین‌بخشی با کمیته + ارائه پیشنهاد تخصصی", "s0": "جلسه‌ای برگزار نمی‌شود", "s1": "برگزاری موردی/غیرمنظم", "s2": "برگزاری منظم با پیشنهادات تخصصی مستند"}, {"num": 12, "text": "شناسایی و به‌کارگیری مشارکت‌کنندگان بالقوه در پروژه مشترک", "s0": "شناسایی نشده", "s1": "شناسایی شده، به‌کارگیری ناقص", "s2": "شناسایی و به‌کارگیری فعال در پروژه مشترک"}, {"num": 13, "text": "ثبت و گزارش مسائل مالی پروژه‌های مشترک", "s0": "ثبت نمی‌شود", "s1": "ثبت ناقص", "s2": "ثبت و گزارش‌دهی کامل و شفاف"}, {"num": 14, "text": "ثبت و انتشار نتایج موفق + استراتژی استفاده از فرهنگ محلی", "s0": "ثبت/انتشار نشده", "s1": "ثبت جزئی، استراتژی فرهنگی وجود ندارد", "s2": "ثبت، انتشار و اجرای استراتژی فرهنگی مدون"}], "icon": "🧩"}, {"title": "حوزه ۳: فعالیت‌های اعتباری خرد (۷ شاخص‌)", "items": [{"num": 15, "text": "شناسایی افراد فقیر/نیازمند و اولویت‌بندی وام کم‌بهره", "s0": "شناسایی نشده", "s1": "شناسایی جزئی بدون معیار مشخص", "s2": "شناسایی مبتنی‌بر معیار مشخص و اولویت‌بندی مستند"}, {"num": 16, "text": "ارتباط مراکز مهارت‌آموزی با فعالیت‌های اعتباری برای خودکفایی", "s0": "ارتباطی وجود ندارد", "s1": "ارتباط ضعیف/غیرمنسجم", "s2": "ارتباط نظام‌مند و اثربخش"}, {"num": 17, "text": "ثبت فعالیت‌های مالی توسط مسئول مالی کمیته", "s0": "ثبت نمی‌شود", "s1": "ثبت ناقص/نامنظم", "s2": "ثبت کامل و منظم توسط مسئول مالی"}, {"num": 18, "text": "پیگیری و جایگزینی منظم وام‌ها/بدهی‌ها", "s0": "پیگیری نمی‌شود", "s1": "پیگیری موردی", "s2": "پیگیری و جایگزینی منظم و مستمر"}, {"num": 19, "text": "افتتاح حساب بانکی اختصاصی کمیته برای امور مالی", "s0": "افتتاح نشده", "s1": "افتتاح شده، استفاده ناقص", "s2": "افتتاح و استفاده کامل برای تمام امور مالی"}, {"num": 20, "text": "تفکیک کارمزد وام برای فعالیت‌های اجتماعی", "s0": "تفکیک نمی‌شود", "s1": "تفکیک جزئی", "s2": "تفکیک کامل و مستند"}, {"num": 21, "text": "اطمینان سرخوشه‌ها از بازپرداخت به‌موقع اقساط", "s0": "اطمینانی حاصل نمی‌شود", "s1": "پیگیری ضعیف", "s2": "پیگیری و اطمینان مستمر از بازپرداخت به‌موقع"}], "icon": "💰"}, {"title": "حوزه ۴: آموزش و سوادآموزی (۵ شاخص‌)", "items": [{"num": 22, "text": "ثبت‌نام و تحصیل تمام کودکان (دختر و پسر) در مدارس", "s0": "پوشش تحصیلی وجود ندارد", "s1": "پوشش جزئی/نابرابر جنسیتی", "s2": "پوشش کامل و برابر برای تمام کودکان"}, {"num": 23, "text": "جلسات منظم مدیران مدارس با کمیته توسعه، والدین و ذینفعان", "s0": "جلسه‌ای برگزار نمی‌شود", "s1": "برگزاری موردی/غیرمنظم", "s2": "برگزاری منظم با پیگیری رفع مشکلات"}, {"num": 24, "text": "اجرای استانداردهای کیفیت آموزشی در مدارس", "s0": "اجرا نمی‌شود", "s1": "اجرای جزئی", "s2": "اجرای کامل استانداردها"}, {"num": 25, "text": "تشکیل کارگروه ویژه آموزش با هماهنگی آموزش‌وپرورش", "s0": "تشکیل نشده", "s1": "تشکیل شده، فعالیت محدود", "s2": "تشکیل و ارزیابی فعال و مستمر مدارس"}, {"num": 26, "text": "تشویق زنان/جوانان برای مشارکت در کمپین ضد بی‌سوادی", "s0": "تشویقی صورت نمی‌گیرد", "s1": "تشویق محدود", "s2": "تشویق فعال و مشارکت مستند"}], "icon": "📚"}, {"title": "حوزه ۵: توسعه سلامت (۲۶ شاخص‌)", "items": [{"num": 27, "text": "آموزش سرخوشه‌ها درخصوص اولویت‌های سلامت و برنامه‌های مرتبط", "s0": "آموزشی نبوده", "s1": "آموزش ناقص", "s2": "آموزش کامل و مستند"}, {"num": 28, "text": "ثبت و گزارش تولد، مرگ و آمار حیاتی توسط داوطلبین", "s0": "ثبت نمی‌شود", "s1": "ثبت ناقص/نامنظم", "s2": "ثبت و گزارش‌دهی کامل و منظم"}, {"num": 29, "text": "راه‌اندازی نظام ارجاع مؤثر با همکاری سیستم بهداشتی", "s0": "راه‌اندازی نشده", "s1": "راه‌اندازی شده، اثربخشی پایین", "s2": "راه‌اندازی و عملکرد اثربخش نظام ارجاع"}, {"num": 30, "text": "آموزش و مشارکت جامعه در پروژه‌های تحقیقاتی جامعه‌محور", "s0": "آموزش/مشارکتی نیست", "s1": "آموزش یا مشارکت جزئی", "s2": "آموزش کامل و مشارکت فعال"}, {"num": 31, "text": "تشکیل کارگروه فرعی نظارت بر سیستم بهداشتی درمانی", "s0": "تشکیل نشده", "s1": "تشکیل شده، فعالیت محدود", "s2": "تشکیل و نظارت فعال و مستمر"}, {"num": 32, "text": "موجودی داروها، واکسن و تجهیزات ضروری مطابق نیاز", "s0": "موجود نیست", "s1": "موجودی ناقص", "s2": "موجودی کامل و متناسب با نیاز"}, {"num": 33, "text": "ارزیابی کیفیت خدمات، رضایت مشتری، دانش کارکنان و اجرای مداخلات", "s0": "ارزیابی نمی‌شود", "s1": "ارزیابی جزئی بدون مداخله", "s2": "ارزیابی کامل و اجرای مداخلات اصلاحی"}, {"num": 34, "text": "مراقبت به‌موقع بارداری + برنامه زایمان ایمن با ماما", "s0": "مراقبتی ارائه نمی‌شود", "s1": "ارائه ناقص/موردی", "s2": "ارائه کامل و دسترسی به زایمان ایمن"}, {"num": 35, "text": "مراقبت پس از زایمان حداقل ۴۰ روز برای تمام مادران", "s0": "ارائه نمی‌شود", "s1": "ارائه ناقص/جزئی", "s2": "ارائه کامل به تمام مادران"}, {"num": 36, "text": "واکسیناسیون کامل کودکان زیر یک سال", "s0": "انجام نمی‌شود", "s1": "پوشش ناقص", "s2": "پوشش کامل و مستند"}, {"num": 37, "text": "ثبت اطلاعات نوزادان و واکسیناسیون مطابق برنامه کشوری", "s0": "ثبت/واکسیناسیون نمی‌شود", "s1": "ثبت یا واکسیناسیون ناقص", "s2": "ثبت کامل و واکسیناسیون مطابق برنامه"}, {"num": 38, "text": "مشارکت فعال در کمپین فلج اطفال (در صورت وجود)", "s0": "مشارکتی نیست", "s1": "مشارکت محدود", "s2": "مشارکت فعال و مستند"}, {"num": 39, "text": "پایش رشد و مراقبت کودکان زیر ۵ سال", "s0": "ارائه نمی‌شود", "s1": "پوشش ناقص", "s2": "پوشش کامل و مستمر"}, {"num": 40, "text": "شناسایی و درمان کمبود ویتامین A، آهن و کم‌خونی", "s0": "شناسایی نمی‌شود", "s1": "شناسایی جزئی بدون پیگیری", "s2": "شناسایی، درمان و پیگیری کامل"}, {"num": 41, "text": "اجرای استراتژی DOTS با مشارکت داوطلبین", "s0": "اجرا نمی‌شود", "s1": "اجرای ناقص", "s2": "اجرای کامل با مشارکت داوطلبین"}, {"num": 42, "text": "اجرای برنامه کنترل مالاریا با مشارکت داوطلبین", "s0": "اجرا نمی‌شود", "s1": "اجرای ناقص", "s2": "اجرای فعال و مستمر"}, {"num": 43, "text": "گزارش موارد مشکوک مالاریا/سل/ایدز توسط داوطلبین و پیگیری", "s0": "گزارش نمی‌شود", "s1": "گزارش‌دهی ناقص", "s2": "گزارش و پیگیری منظم"}, {"num": 44, "text": "آموزش جامعه در خصوص راه‌های انتقال و پیشگیری از ایدز", "s0": "آموزشی نبوده", "s1": "آموزش محدود", "s2": "آموزش کامل و فراگیر"}, {"num": 45, "text": "شناسایی بیماران مزمن و برنامه پیگیری با مشارکت داوطلبین", "s0": "شناسایی نمی‌شود", "s1": "شناسایی بدون برنامه پیگیری", "s2": "شناسایی، تدوین و اجرای برنامه پیگیری"}, {"num": 46, "text": "شناسایی بیماری‌های روانی/سوءمصرف مواد + حمایت و آموزش جامعه", "s0": "شناسایی نمی‌شود", "s1": "شناسایی بدون حمایت/آموزش", "s2": "شناسایی، حمایت و آموزش کامل"}, {"num": 47, "text": "شناسایی افراد با ناتوانی جسمی و حمایت اجتماعی", "s0": "شناسایی نمی‌شود", "s1": "شناسایی بدون حمایت", "s2": "شناسایی و حمایت اجتماعی کامل"}, {"num": 48, "text": "شناسایی مناطق پرخطر و اقدام کاهش آسیب", "s0": "شناسایی نمی‌شود", "s1": "شناسایی بدون اقدام", "s2": "شناسایی و اقدام مؤثر"}, {"num": 49, "text": "شهر عاری از جرم، خشونت علیه زنان/مردان/نژادها", "s0": "وضعیت نامطلوب گسترده", "s1": "بهبود جزئی", "s2": "وضعیت مطلوب و مستند"}, {"num": 50, "text": "ارتقای دوران کودکی و ایجاد جامعه/خانه دوستدار کودک", "s0": "اقدامی صورت نگرفته", "s1": "اقدام جزئی", "s2": "اقدام کامل و نهادینه‌شده"}, {"num": 51, "text": "اجرای برنامه مدارس مروج سلامت در تمام مدارس", "s0": "اجرا نمی‌شود", "s1": "اجرای جزئی/برخی مدارس", "s2": "اجرا در تمام مدارس شهر"}, {"num": 52, "text": "اجرای بهداشت و ایمنی حرفه‌ای + دسترسی به کمک‌های اولیه در محیط کار", "s0": "اجرا نمی‌شود", "s1": "اجرای ناقص", "s2": "اجرا کامل و دسترسی تضمین‌شده"}], "icon": "🩺"}, {"title": "حوزه ۶: آب، فاضلاب، امنیت غذایی و آلودگی هوا (۱۱ شاخص‌)", "items": [{"num": 53, "text": "تمیزی محل اجرای برنامه و وجود فضای سبز کافی", "s0": "فضای سبز وجود ندارد، محیط نامناسب", "s1": "فضای سبز محدود یا نامتناسب", "s2": "محیط تمیز و فضای سبز کافی و مستند"}, {"num": 54, "text": "برنامه مؤثر مدیریت پسماند جامد با تکیه بر جامعه", "s0": "برنامه‌ای وجود ندارد", "s1": "برنامه وجود دارد اما اجرا ناقص", "s2": "برنامه مؤثر و اجراشده با مشارکت جامعه"}, {"num": 55, "text": "نقشه منابع آب + حفاظت از منابع + برنامه تصفیه آب + آگاهی کمیته", "s0": "هیچ‌کدام وجود ندارد", "s1": "برخی موارد موجود، آگاهی کمیته ناقص", "s2": "نقشه، حفاظت، برنامه تصفیه و آگاهی کامل کمیته"}, {"num": 56, "text": "دسترسی همه خانوارها به آب آشامیدنی و فاضلاب + آگاهی از خطرات و روش‌های آلودگی‌زدایی", "s0": "دسترسی وجود ندارد، آگاهی صفر", "s1": "دسترسی جزئی یا آگاهی ناقص", "s2": "دسترسی کامل و آگاهی مستند خانوارها"}, {"num": 57, "text": "آشنایی سرخوشه‌ها با حفظ محیط سالم و مداخلات مرتبط (بازار سلامت، بیمارستان ارتقادهنده، مدارس مروج)", "s0": "آشنایی وجود ندارد", "s1": "آشنایی جزئی با برخی مداخلات", "s2": "آشنایی کامل با تمام مداخلات مرتبط"}, {"num": 58, "text": "مشارکت جامعه در ایمنی غذایی + پایش تمام مراکز غذای سالم توسط اداره غذا", "s0": "مشارکت/پایش وجود ندارد", "s1": "مشارکت یا پایش جزئی", "s2": "مشارکت فعال جامعه و پایش کامل مراکز"}, {"num": 59, "text": "دسترسی آسان به مراکز فروش غذای سالم با محصولات ضروری", "s0": "دسترسی وجود ندارد", "s1": "دسترسی محدود یا محصولات ناقص", "s2": "دسترسی آسان و تأمین کامل محصولات ضروری"}, {"num": 60, "text": "ممنوعیت سیگار در مکان‌های بسته/عمومی + برنامه شهر بدون دخانیات", "s0": "ممنوعیت/برنامه وجود ندارد", "s1": "ممنوعیت جزئی یا برنامه تدوین‌نشده", "s2": "ممنوعیت اجراشده و برنامه مدون شهر بدون دخانیات"}, {"num": 61, "text": "مرکز مدیریت کیفیت هوا با مشارکت شهرداری + پایش منظم + آگاهی مردم", "s0": "هیچ‌کدام وجود ندارد", "s1": "مرکز تشکیل شده اما پایش/آگاهی ناقص", "s2": "مرکز فعال، پایش منظم و آگاهی عمومی مستند"}, {"num": 62, "text": "اجرای مداخلات کاهش آلودگی هوا توسط برنامه‌ریزان شهری", "s0": "مداخله‌ای اجرا نمی‌شود", "s1": "مداخلات محدود/موردی", "s2": "مداخلات جامع و مستمر"}, {"num": 63, "text": "بررسی طرح‌های شهری و ساختمانی از نظر تأثیر بر آلودگی هوا قبل از تأیید", "s0": "بررسی انجام نمی‌شود", "s1": "بررسی موردی/غیرنظام‌مند", "s2": "بررسی اجباری و نظام‌مند پیش از تأیید"}], "icon": "💧"}, {"title": "حوزه ۷: مرکز اطلاعات مبتنی بر جامعه (۵ شاخص‌)", "items": [{"num": 64, "text": "ایجاد مرکز اطلاعات جامعه‌محور + آموزش سرخوشه‌ها/داوطلبین و کمیته در جمع‌آوری، آنالیز و استفاده از اطلاعات", "s0": "مرکز ایجاد نشده، آموزشی نبوده", "s1": "مرکز ایجاد شده اما آموزش ناقص", "s2": "مرکز فعال و آموزش کامل تمام اعضا"}, {"num": 65, "text": "نمایش اطلاعات کلیدی در مرکز/اداره شهر سالم و در دسترس قراردادن برای جامعه و مراکز ذیربط", "s0": "اطلاعاتی نمایش داده نمی‌شود", "s1": "نمایش جزئی یا دسترسی محدود", "s2": "نمایش کامل و دسترسی فعال برای همه ذینفعان"}, {"num": 66, "text": "استفاده کمیته‌ها از اطلاعات کلیدی برای پایش و حمایت از برنامه", "s0": "استفاده نمی‌شود", "s1": "استفاده موردی/غیرمنظم", "s2": "استفاده منظم و مستند در پایش و تصمیم‌گیری"}, {"num": 67, "text": "ثبت، به‌روز بودن و دسترسی کمیته‌ها به فرم‌ها، نتایج و اطلاعات ارزیابی اولیه", "s0": "ثبت نمی‌شود", "s1": "ثبت ناقص یا به‌روز نیست", "s2": "ثبت کامل، به‌روز و در دسترس کمیته‌ها"}, {"num": 68, "text": "ایجاد پروفایل شهری + به‌روزرسانی منظم + استفاده در برنامه‌ریزی و پایش", "s0": "پروفایل ایجاد نشده", "s1": "پروفایل موجود اما به‌روز/مورداستفاده نیست", "s2": "پروفایل کامل، به‌روز و فعالانه مورداستفاده"}], "icon": "🗂️"}, {"title": "حوزه ۸: توسعه مهارت‌ها، آموزش شغلی و ظرفیت‌سازی (۶ شاخص‌)", "items": [{"num": 69, "text": "ارزیابی و ارتقای علاقه‌مندی‌ها، مهارت‌ها و تکنولوژی‌های محلی", "s0": "ارزیابی/ارتقایی صورت نگرفته", "s1": "ارزیابی انجام شده اما ارتقا ناقص", "s2": "ارزیابی و ارتقای فعال و مستمر"}, {"num": 70, "text": "فعالیت مراکز مهارت‌آموزی برای زنان و مردان با مشارکت بین‌بخشی و ارتباط با بازار محلی", "s0": "مرکزی فعال نیست", "s1": "مرکز فعال اما مشارکت بین‌بخشی یا ارتباط با بازار ضعیف", "s2": "فعالیت کامل با مشارکت بین‌بخشی و ارتباط مؤثر با بازار"}, {"num": 71, "text": "اولویت‌دهی کمیته به وام‌های کم‌هزینه برای فارغ‌التحصیلان فنی", "s0": "اولویت‌دهی وجود ندارد", "s1": "اولویت‌دهی جزئی/غیرمنظم", "s2": "اولویت‌دهی رسمی و مستند"}, {"num": 72, "text": "اداره مراکز آموزش فنی توسط بخش خصوصی یا سازمان‌های مردم‌نهاد", "s0": "مرکزی وجود ندارد", "s1": "مراکز موجود اما مدیریت ناکارآمد", "s2": "مراکز فعال با مدیریت کارآمد خصوصی/مردم‌نهاد"}, {"num": 73, "text": "ایجاد و اداره مراکز کامپیوتر، کلاس‌های زبان، امکانات ورزشی توسط بخش خصوصی/مردم‌نهاد", "s0": "هیچ مرکزی وجود ندارد", "s1": "برخی مراکز موجود", "s2": "طیف کامل مراکز فعال و در دسترس"}, {"num": 74, "text": "شناسایی و حمایت از افراد خلاق", "s0": "شناسایی/حمایتی صورت نگرفته", "s1": "شناسایی شده اما حمایت ناقص", "s2": "شناسایی و حمایت فعال و مستند"}], "icon": "🛠️"}, {"title": "حوزه ۹: آمادگی و پاسخ در فوریت‌ها (۶ شاخص‌)", "items": [{"num": 75, "text": "شناسایی و ثبت وقایع اورژانسی ۲۰ سال گذشته", "s0": "شناسایی/ثبت نشده", "s1": "شناسایی جزئی یا ثبت ناقص", "s2": "شناسایی و ثبت کامل و مستند"}, {"num": 76, "text": "تشکیل کارگروه آمادگی و پاسخگویی اورژانسی + ابلاغ وظایف به اعضا", "s0": "تشکیل نشده", "s1": "تشکیل شده، وظایف ابلاغ نشده یا ناقص", "s2": "تشکیل رسمی و ابلاغ کامل وظایف"}, {"num": 77, "text": "آماده‌سازی پروفایل شهر + نگهداری نسخه خارج از شهر", "s0": "پروفایل آماده نشده", "s1": "پروفایل موجود اما نسخه خارجی ندارد", "s2": "پروفایل کامل با نسخه نگهداری‌شده خارج از شهر"}, {"num": 78, "text": "آموزش سرخوشه‌ها/داوطلبین در برنامه‌های آمادگی اورژانسی + توانایی ارائه کمک‌های اولیه", "s0": "آموزشی نبوده", "s1": "آموزش جزئی، توانایی کمک‌های اولیه ناقص", "s2": "آموزش کامل و توانایی مستند ارائه کمک‌های اولیه"}, {"num": 79, "text": "تدوین برنامه مدیریت بحران + توافق سازمان‌ها + آگاهی جامعه و شناخت مسئولین", "s0": "برنامه‌ای وجود ندارد", "s1": "برنامه تدوین شده اما توافق/آگاهی ناقص", "s2": "برنامه کامل، توافق سازمانی و آگاهی عمومی مستند"}, {"num": 80, "text": "شناسایی گروه‌های آسیب‌پذیر (مادران باردار، معلولین، بیماران مزمن، سالمندان، بیماران روانی) + اطلاع‌رسانی به سازمان‌های مدیریت بحران", "s0": "شناسایی/اطلاع‌رسانی نشده", "s1": "شناسایی جزئی یا اطلاع‌رسانی ناقص", "s2": "شناسایی کامل و اطلاع‌رسانی مستند به تمام سازمان‌های ذیربط"}], "icon": "🚨"}], "bands": [{"label": "قرمز (ضعیف)", "range": "0-40", "analysis": "بیشتر شاخصها امتیاز ۰ گرفته اند؛ شهر فاقد اکثر زیرساختها و شواهد لازم است.", "recommendations": ["اولویت‌بندی فوری شاخص‌های بنیادین (به‌ویژه حوزهٔ ۱ و ۲ که پیش‌نیاز سایر حوزه‌ها هستند) پیش از ورود به شاخص‌های تخصصی‌تر", "تشکیل تیم راهبری اضطراری با حضور مدیر ارشد شهری برای رفع موانع ساختاری", "تدوین برنامهٔ اقدام کوتاه‌مدت (۳ تا ۶ ماهه) با تمرکز صرف بر «ایجاد پیش‌نیازها» نه «بهبود کیفیت»", "جلب حمایت سیاسی و تخصیص منابع حداقلی برای خروج از وضعیت بحرانی", "بازنگری در تخصیص وظایف؛ احتمال وجود خلأ در مسئولیت‌پذیری نهادی"]}, {"label": "نارنجی (کمتر از حد انتظار)", "range": "41-80", "analysis": "ترکیبی از امتیازهای ۰ و ۱ غالب است؛ اقدامات اولیه انجام شده اما تحقق کامل شاخصها بسیار محدود است.", "recommendations": ["شناسایی شاخص‌های «تحقق جزئی» (امتیاز ۱) و تمرکز بر تکمیل مستندسازی و شواهد ناقص آن‌ها", "نهادینه‌سازی فعالیت‌های موردی موجود در قالب رویه‌های مکتوب و تکرارپذیر", "تدوین تقویم زمان‌بندی‌شدهٔ ۶ تا ۱۲ ماهه با نقاط کنترل (Milestone) سه‌ماهه", "تقویت هماهنگی بین‌بخشی، به‌ویژه در حوزه‌هایی که همپوشانی وظایف دارند (مانند حوزهٔ ۲)", "آموزش تکمیلی کادر اجرایی برای رفع شکاف دانشی مانع تحقق کامل شاخص‌ها"]}, {"label": "زرد (نسبتاً قابل قبول)", "range": "81-120", "analysis": "بخش عمده ای از شاخصها حداقل امتیاز ۱ (تحقق جزئی) و برخی امتیاز ۲ دارند؛ عملکرد در حد میانه است.", "recommendations": ["تحلیل ریشه‌ای (Root Cause Analysis) شاخص‌های باقی‌مانده در سطح صفر یا یک برای تعیین علت عدم تکمیل", "حرکت از رویکرد «کمّی» به «کیفی»؛ تمرکز بر ارتقای شواهد از سطح ناقص به مستند و کامل", "استقرار نظام پایش دوره‌ای (ترجیحاً فصلی) برای جلوگیری از رکود در همین سطح", "بهره‌گیری از تجارب موفق حوزه‌های قوی‌تر برنامه به‌عنوان الگو برای حوزه‌های ضعیف‌تر (یادگیری درون‌سازمانی)", "آماده‌سازی برای ارزیابی خارجی/گواهی‌دهی، در صورت وجود چنین مرحله‌ای در برنامهٔ شهر سالم"]}, {"label": "سبز (مطلوب)", "range": "121-160", "analysis": "اکثریت شاخصها امتیاز ۲ (تحقق کامل با شواهد مستند) گرفته اند؛ شهر به استانداردهای برنامه شهر سالم نزدیک است.", "recommendations": ["تدوین سازوکار پایداری (Sustainability) برای حفظ دستاوردها در برابر تغییرات مدیریتی یا کاهش منابع", "مستندسازی و انتشار تجربیات موفق به‌عنوان الگوی قابل تعمیم به سایر مناطق یا شهرها", "تمرکز بر شاخص‌های باقی‌ماندهٔ سطح ۱ برای دستیابی به تحقق کامل (۱۰۰٪)", "ورود به فاز ارتقای کیفی فراتر از الزامات حداقلی، مانند نوآوری در مداخلات محلی", "در نظر گرفتن این حوزه‌ها به‌عنوان منبع منتورینگ برای حوزه‌ها یا شهرهای دارای عملکرد پایین‌تر"]}], "maxScore": 160, "totalItems": 80};
+const STORAGE_KEY = 'healthyCityAssessments_v1';
+const persianDigits = ['۰','۱','۲','۳','۴','۵','۶','۷','۸','۹'];
+function pd(n){ return String(n).replace(/[0-9]/g, d => persianDigits[d]); }
+
+let scores = {}; // itemNum -> 0|1|2
+let currentSearch = '';
+let statusFilter = 'all'; // all | answered | unanswered
+
+/* ---------------- Jalali calendar (pure JS, no deps) ---------------- */
+function div(a,b){ return ~~(a/b); }
+function jalCal(gy){
+  const g2j = gregorianToJalali;
+  return g2j;
+}
+function gregorianToJalali(gy, gm, gd){
+  const g_d_m = [0,31,59,90,120,151,181,212,243,273,304,334];
+  let jy = (gy <= 1600) ? 0 : 979;
+  gy -= (gy <= 1600) ? 621 : 1600;
+  const gy2 = (gm > 2) ? (gy + 1) : gy;
+  let days = (365*gy) + (div((gy2+3),4)) - (div((gy2+99),100)) + (div((gy2+399),400)) - 80 + gd + g_d_m[gm-1];
+  jy += 33*div(days,12053);
+  days %= 12053;
+  jy += 4*div(days,1461);
+  days %= 1461;
+  if (days > 365){
+    jy += div((days-1),365);
+    days = (days-1)%365;
+  }
+  let jm, jd;
+  if (days < 186){
+    jm = 1 + div(days,31);
+    jd = 1 + (days%31);
+  } else {
+    jm = 7 + div((days-186),30);
+    jd = 1 + ((days-186)%30);
+  }
+  return [jy, jm, jd];
+}
+function jalaliToGregorian(jy, jm, jd){
+  let gy = (jy <= 979) ? 621 : 1600;
+  jy -= (jy <= 979) ? 0 : 979;
+  let days = 365*jy + div(jy,33)*8 + div(((jy%33)+3),4) + 78 + jd + ((jm < 7) ? (jm-1)*31 : ((jm-7)*30)+186);
+  gy += 400*div(days,146097);
+  days %= 146097;
+  if (days > 36524){
+    gy += 100*div((days-1),36524);
+    days = (days-1)%36524;
+    if (days >= 365) days++;
+  }
+  gy += 4*div(days,1461);
+  days %= 1461;
+  if (days > 365){
+    gy += div((days-1),365);
+    days = (days-1)%365;
+  }
+  let gd = days + 1;
+  const sal_a = [0,31,((gy%4===0 && gy%100!==0) || gy%400===0)?29:28,31,30,31,30,31,31,30,31,30,31];
+  let gm;
+  for (gm = 0; gm < 13; gm++){
+    if (gd <= sal_a[gm]) break;
+    gd -= sal_a[gm];
+  }
+  return [gy, gm, gd];
+}
+function isJalaliLeap(jy){
+  return ((((jy-((jy>0)?474:473))%2820)+474+38)*682)%2816 < 682;
+}
+function jalaliMonthLength(jy, jm){
+  if (jm <= 6) return 31;
+  if (jm <= 11) return 30;
+  return isJalaliLeap(jy) ? 30 : 29;
+}
+const jMonthNames = ['فروردین','اردیبهشت','خرداد','تیر','مرداد','شهریور','مهر','آبان','آذر','دی','بهمن','اسفند'];
+const jWeekDays = ['ش','ی','د','س','چ','پ','ج'];
+
+function todayJalali(){
+  const now = new Date();
+  return gregorianToJalali(now.getFullYear(), now.getMonth()+1, now.getDate());
+}
+
+let calState = { y:0, m:0, d:0, selected:null };
+
+function initCalendar(){
+  const t = todayJalali();
+  calState.y = t[0]; calState.m = t[1]; calState.d = t[2];
+  calState.selected = t.slice();
+  renderCalendar();
+  document.getElementById('dateDisplay').textContent =
+    pd(t[2]) + ' ' + jMonthNames[t[1]-1] + ' ' + pd(t[0]);
+}
+
+function renderCalendar(){
+  const grid = document.getElementById('calGrid');
+  const title = document.getElementById('calTitle');
+  title.textContent = jMonthNames[calState.m-1] + ' ' + pd(calState.y);
+  grid.innerHTML = '';
+  jWeekDays.forEach(w => {
+    const el = document.createElement('div');
+    el.className = 'dow'; el.textContent = w;
+    grid.appendChild(el);
+  });
+  // weekday of first day of month
+  const g = jalaliToGregorian(calState.y, calState.m, 1);
+  const jsDate = new Date(g[0], g[1]-1, g[2]);
+  let startDow = (jsDate.getDay()+1)%7; // convert Sun=0..Sat=6 -> Sat=0..Fri=6
+  for (let i=0;i<startDow;i++){
+    const el = document.createElement('div');
+    el.className = 'cal-day empty';
+    grid.appendChild(el);
+  }
+  const len = jalaliMonthLength(calState.y, calState.m);
+  const t = todayJalali();
+  for (let d=1; d<=len; d++){
+    const el = document.createElement('div');
+    el.className = 'cal-day';
+    if (t[0]===calState.y && t[1]===calState.m && t[2]===d) el.classList.add('today');
+    if (calState.selected && calState.selected[0]===calState.y && calState.selected[1]===calState.m && calState.selected[2]===d)
+      el.classList.add('selected');
+    el.textContent = pd(d);
+    el.onclick = () => {
+      calState.selected = [calState.y, calState.m, d];
+      document.getElementById('dateDisplay').textContent =
+        pd(d) + ' ' + jMonthNames[calState.m-1] + ' ' + pd(calState.y);
+      document.getElementById('calPopup').classList.remove('show');
+      renderCalendar();
+      updatePrintHeader();
+      persistDraft();
+    };
+    grid.appendChild(el);
+  }
+}
+function calNav(dir){
+  calState.m += dir;
+  if (calState.m > 12){ calState.m = 1; calState.y++; }
+  if (calState.m < 1){ calState.m = 12; calState.y--; }
+  renderCalendar();
+}
+
+/* ---------------- Rendering ---------------- */
+function bandColorClass(label){
+  if (label.indexOf('قرمز') > -1) return 'red';
+  if (label.indexOf('نارنجی') > -1) return 'orange';
+  if (label.indexOf('زرد') > -1) return 'yellow';
+  if (label.indexOf('سبز') > -1) return 'green';
+  return 'red';
+}
+
+function getBandForScore(total){
+  for (const b of DATA.bands){
+    const parts = b.range.split('-').map(s=>parseInt(s.trim(),10));
+    if (total >= parts[0] && total <= parts[1]) return b;
+  }
+  return DATA.bands[0];
+}
+
+function buildDomains(){
+  const container = document.getElementById('domainsContainer');
+  container.innerHTML = '';
+  DATA.domains.forEach((dm, di) => {
+    const card = document.createElement('div');
+    card.className = 'domain-card';
+    card.dataset.domainIndex = di;
+
+    const header = document.createElement('div');
+    header.className = 'domain-header';
+    header.innerHTML = `
+      <span class="domain-icon">${dm.icon}</span>
+      <div class="domain-title">
+        <h3>${dm.title}</h3>
+        <span class="answered-label"></span>
+      </div>
+      <div class="domain-score"></div>
+      <span class="domain-chevron">▾</span>
+    `;
+    header.onclick = () => {
+      card.classList.toggle('open');
+      const body = card.querySelector('.domain-body');
+      body.style.maxHeight = card.classList.contains('open') ? body.scrollHeight + 'px' : '0px';
+    };
+    card.appendChild(header);
+
+    const miniTrack = document.createElement('div');
+    miniTrack.className = 'domain-mini-track';
+    const miniFill = document.createElement('div');
+    miniFill.className = 'domain-mini-fill';
+    miniTrack.appendChild(miniFill);
+    card.appendChild(miniTrack);
+
+    const body = document.createElement('div');
+    body.className = 'domain-body';
+
+    dm.items.forEach(it => {
+      const itemEl = document.createElement('div');
+      itemEl.className = 'item';
+      itemEl.dataset.itemNum = it.num;
+      itemEl.dataset.searchText = (it.text + ' ' + it.s0 + ' ' + it.s1 + ' ' + it.s2).toLowerCase();
+
+      const head = document.createElement('div');
+      head.className = 'item-head';
+      head.innerHTML = `
+        <span class="item-num">${pd(it.num)}</span>
+        <span class="item-text">${it.text}</span>
+        <span class="item-status"><span class="status-dot"></span></span>
+      `;
+      //head.onclick = () => { itemEl.classList.toggle('open'); };
+      head.style.cursor = "default";
+      itemEl.appendChild(head);
+
+      const opts = document.createElement('div');
+      opts.className = 'item-options';
+      [['0',it.s0],['1',it.s1],['2',it.s2]].forEach(([lvl,txt]) => {
+        const opt = document.createElement('div');
+        opt.className = 'opt opt' + lvl;
+        opt.innerHTML = `<span class="opt-badge">${pd(lvl)}</span><span>${txt}</span>`;
+        opt.onclick = (e) => {
+          e.stopPropagation();
+          scores[it.num] = parseInt(lvl,10);
+          persistDraft();
+          refreshAll();
+        };
+        opts.appendChild(opt);
+      });
+      itemEl.appendChild(opts);
+      body.appendChild(itemEl);
+    });
+
+    card.appendChild(body);
+    container.appendChild(card);
+  });
+}
+
+function refreshAll(){
+  let total = 0, answered = 0;
+  DATA.domains.forEach((dm, di) => {
+    const card = document.querySelector(`.domain-card[data-domain-index="${di}"]`);
+    let dTotal = 0, dAnswered = 0;
+    const dMax = dm.items.length * 2;
+    dm.items.forEach(it => {
+      const val = scores[it.num];
+      const itemEl = card.querySelector(`.item[data-item-num="${it.num}"]`);
+      const dot = itemEl.querySelector('.status-dot');
+      dot.className = 'status-dot';
+      if (val !== undefined && val !== null){
+        dTotal += val; dAnswered++;
+        total += val; answered++;
+        dot.classList.add('s'+val);
+        itemEl.querySelectorAll('.opt').forEach(o => o.classList.remove('selected'));
+        itemEl.querySelector('.opt' + val).classList.add('selected');
+      } else {
+        itemEl.querySelectorAll('.opt').forEach(o => o.classList.remove('selected'));
+      }
+    });
+    card.querySelector('.domain-score').textContent = pd(dTotal) + ' / ' + pd(dMax);
+    card.querySelector('.answered-label').textContent = pd(dAnswered) + ' از ' + pd(dm.items.length) + ' شاخص پاسخ داده شده';
+    card.querySelector('.domain-mini-fill').style.width = (dMax? (dTotal/dMax*100):0) + '%';
+  });
+
+  document.getElementById('gaugeScore').textContent = pd(total);
+  document.getElementById('answeredStat').innerHTML = `<b>${pd(answered)} / ${pd(DATA.totalItems)}</b>`;
+  const pct = Math.round((answered/DATA.totalItems)*100);
+  document.getElementById('progressPct').innerHTML = `<b>${pd(pct)}٪</b>`;
+  document.getElementById('progressFill').style.width = pct + '%';
+
+  const band = getBandForScore(total);
+  const cls = bandColorClass(band.label);
+  const pill = document.getElementById('bandPill');
+  pill.textContent = band.label;
+  pill.style.background = `var(--${cls}-bg)`;
+  pill.style.color = `var(--${cls})`;
+
+  document.getElementById('bandAnalysis').textContent = answered>0 ? band.analysis : 'برای مشاهده تحلیل، ارزیابی را آغاز کنید.';
+
+  updatePrintHeader();
+
+  // gauge ring
+  const maxScore = DATA.maxScore;
+  const ratio = Math.min(total/maxScore, 1);
+  const circumference = 2*Math.PI*54;
+  const ring = document.getElementById('gaugeRing');
+  ring.style.strokeDasharray = circumference;
+  ring.style.strokeDashoffset = circumference * (1-ratio);
+  ring.style.stroke = `var(--${cls})`;
+
+  // highlight current band card in guide
+  document.querySelectorAll('.guide-card').forEach(c => c.classList.remove('current'));
+  const idx = DATA.bands.indexOf(band);
+  const gc = document.querySelector(`.guide-card[data-band-index="${idx}"]`);
+  if (gc && answered>0) gc.classList.add('current');
+
+  // recommendations
+  const recoBox = document.getElementById('recoList');
+  recoBox.innerHTML = '';
+  if (answered>0){
+    band.recommendations.forEach(r => {
+      const li = document.createElement('li');
+      li.textContent = r;
+      recoBox.appendChild(li);
+    });
+    document.getElementById('recoTitle').textContent = 'توصیه‌ها بر اساس وضعیت فعلی («' + band.label + '»)';
+  } else {
+    document.getElementById('recoTitle').textContent = 'توصیه‌ها';
+    const li = document.createElement('li');
+    li.textContent = 'با پاسخ‌دهی به شاخص‌ها، توصیه‌های متناسب با وضعیت شهر نمایش داده می‌شود.';
+    recoBox.appendChild(li);
+  }
+}
+
+function buildGuide(){
+  const grid = document.getElementById('guideGrid');
+  grid.innerHTML = '';
+  DATA.bands.forEach((b, i) => {
+    const cls = bandColorClass(b.label);
+    const card = document.createElement('div');
+    card.className = 'guide-card b-' + cls;
+    card.dataset.bandIndex = i;
+    card.innerHTML = `<h4>${b.label}</h4><div class="range">${pd(b.range)} امتیاز</div><p>${b.analysis}</p>`;
+    grid.appendChild(card);
+  });
+}
+
+/* ---------------- Search / filter ---------------- */
+function applyFilter(){
+  const q = currentSearch.trim().toLowerCase();
+  document.querySelectorAll('.domain-card').forEach(card => {
+    let anyVisible = false;
+    card.querySelectorAll('.item').forEach(itemEl => {
+      const num = itemEl.dataset.itemNum;
+      const matchesText = !q || itemEl.dataset.searchText.indexOf(q) > -1;
+      let matchesStatus = true;
+      const val = scores[num];
+      if (statusFilter === 'answered') matchesStatus = (val !== undefined && val !== null);
+      if (statusFilter === 'unanswered') matchesStatus = (val === undefined || val === null);
+      const show = matchesText && matchesStatus;
+      itemEl.style.display = show ? '' : 'none';
+      if (show) anyVisible = true;
+      if (show && q) itemEl.classList.add('open');
+    });
+    card.style.display = anyVisible ? '' : 'none';
+    if (anyVisible && (q || statusFilter!=='all')){
+      card.classList.add('open');
+      const body = card.querySelector('.domain-body');
+      body.style.maxHeight = body.scrollHeight + 'px';
+    }
+  });
+}
+
+/* ---------------- Persistence ---------------- */
+function persistDraft(){
+  try{
+    localStorage.setItem('healthyCityDraft_v1', JSON.stringify({
+      scores,
+      date: document.getElementById('dateDisplay').textContent,
+      city: document.getElementById('cityName').value,
+      assessor: document.getElementById('assessorName').value
+    }));
+  }catch(e){}
+}
+function loadDraft(){
+  try{
+    const raw = localStorage.getItem('healthyCityDraft_v1');
+    if (raw){
+      const parsed = JSON.parse(raw);
+      scores = parsed.scores || {};
+      if (parsed.city) document.getElementById('cityName').value = parsed.city;
+      if (parsed.assessor) document.getElementById('assessorName').value = parsed.assessor;
+    }
+  }catch(e){}
+}
+
+function updatePrintHeader(){
+  const city = document.getElementById('cityName').value.trim();
+  const assessor = document.getElementById('assessorName').value.trim();
+  document.getElementById('printCity').textContent = city || '—';
+  document.getElementById('printAssessor').textContent = assessor || '—';
+  document.getElementById('printDate').textContent = document.getElementById('dateDisplay').textContent || '—';
+  const total = Object.values(scores).reduce((a,b)=>a+b,0);
+  document.getElementById('printScore').textContent = pd(total) + ' از ' + pd(DATA.maxScore);
+}
+
+function getSavedList(){
+  try{
+    return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+  }catch(e){ return []; }
+}
+function setSavedList(list){
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
+}
+
+function showToast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), 2200);
+}
+
+async function sendAssessmentToGoogleSheet(entry){
+  if (!GOOGLE_SHEETS_WEB_APP_URL.startsWith('https://script.google.com/macros/s/')) {
+    throw new Error('Google Sheets Web App URL is not configured.');
+  }
+
+  await fetch(GOOGLE_SHEETS_WEB_APP_URL, {
+    method: 'POST',
+    mode: 'no-cors',
+    headers: {'Content-Type': 'text/plain;charset=utf-8'},
+    body: JSON.stringify(entry)
+  });
+}
+
+async function saveAssessment(){
+  const name = document.getElementById('assessorName').value.trim() || 'بدون نام';
+  const city = document.getElementById('cityName').value.trim() || 'بدون نام شهر';
+  const date = document.getElementById('dateDisplay').textContent;
+  const total = Object.values(scores).reduce((a,b)=>a+b,0);
+  const answered = Object.keys(scores).length;
+  const entry = {
+    id: Date.now(),
+    name,
+    city,
+    date,
+    scores: {...scores},
+    total,
+    maxScore: DATA.maxScore,
+    answered,
+    totalItems: DATA.totalItems,
+    status: getBandForScore(total).label,
+    savedAt: new Date().toISOString()
+  };
+  const list = getSavedList();
+  list.unshift(entry);
+  setSavedList(list.slice(0,50));
+  try {
+    await sendAssessmentToGoogleSheet(entry);
+    showToast('ارزیابی در گوگل شیت ذخیره شد');
+  } catch (error) {
+    showToast('ارسال به گوگل شیت ناموفق بود؛ نسخهٔ محلی ذخیره شد');
+  }
+}
+
+function openLoadModal(){
+  const list = getSavedList();
+  const wrap = document.getElementById('modalList');
+  wrap.innerHTML = '';
+  if (list.length === 0){
+    wrap.innerHTML = '<div class="modal-empty">هنوز ارزیابی ذخیره‌شده‌ای وجود ندارد.</div>';
+  } else {
+    list.forEach(entry => {
+      const row = document.createElement('div');
+      row.className = 'modal-item';
+      row.innerHTML = `
+        <div>
+          <div><b>${entry.name}</b>${entry.city ? ' — ' + entry.city : ''}</div>
+          <div style="color:var(--text-mute);font-size:.78rem;">${entry.date} — امتیاز ${pd(entry.total)} از ${pd(DATA.maxScore)} (${pd(entry.answered)} پاسخ)</div>
+        </div>
+        <div style="display:flex;gap:10px;align-items:center;">
+          <span class="load-btn">بارگذاری</span>
+          <button title="حذف">🗑</button>
+        </div>
+      `;
+      row.querySelector('.load-btn').onclick = () => {
+        scores = {...entry.scores};
+        document.getElementById('assessorName').value = entry.name;
+        document.getElementById('cityName').value = entry.city || '';
+        document.getElementById('dateDisplay').textContent = entry.date;
+        buildDomains();
+        refreshAll();
+        applyFilter();
+        closeModal();
+        showToast('ارزیابی بارگذاری شد');
+      };
+      row.querySelector('button').onclick = () => {
+        const l2 = getSavedList().filter(e => e.id !== entry.id);
+        setSavedList(l2);
+        openLoadModal();
+      };
+      wrap.appendChild(row);
+    });
+  }
+  document.getElementById('modalOverlay').classList.add('show');
+}
+function closeModal(){ document.getElementById('modalOverlay').classList.remove('show'); }
+
+function resetAll(){
+  if (!confirm('همه پاسخ‌ها پاک شوند؟')) return;
+  scores = {};
+  persistDraft();
+  buildDomains();
+  refreshAll();
+  applyFilter();
+}
+
+/* ---------------- Init ---------------- */
+document.addEventListener('DOMContentLoaded', () => {
+  loadDraft();
+  buildDomains();
+  buildGuide();
+  refreshAll();
+  initCalendar();
+
+  document.getElementById('searchBox').addEventListener('input', e => {
+    currentSearch = e.target.value;
+    applyFilter();
+  });
+  document.querySelectorAll('.filter-chip').forEach(chip => {
+    chip.onclick = () => {
+      document.querySelectorAll('.filter-chip').forEach(c=>c.classList.remove('active'));
+      chip.classList.add('active');
+      statusFilter = chip.dataset.filter;
+      applyFilter();
+    };
+  });
+
+  document.getElementById('dateDisplay').onclick = (e) => {
+    document.getElementById('calPopup').classList.toggle('show');
+  };
+  document.addEventListener('click', e => {
+    const pop = document.getElementById('calPopup');
+    if (!pop.contains(e.target) && e.target.id !== 'dateDisplay'){
+      pop.classList.remove('show');
+    }
+  });
+  document.getElementById('calPrev').onclick = () => calNav(-1);
+  document.getElementById('calNext').onclick = () => calNav(1);
+
+  document.getElementById('cityName').addEventListener('input', () => { updatePrintHeader(); persistDraft(); });
+  document.getElementById('assessorName').addEventListener('input', () => { updatePrintHeader(); persistDraft(); });
+
+  document.getElementById('saveBtn').onclick = saveAssessment;
+  document.getElementById('loadBtn').onclick = openLoadModal;
+  document.getElementById('resetBtn').onclick = resetAll;
+  document.getElementById('printBtn').onclick = () => window.print();
+  document.getElementById('modalCloseBtn').onclick = closeModal;
+  document.getElementById('modalOverlay').addEventListener('click', e => {
+    if (e.target.id === 'modalOverlay') closeModal();
+  });
+});
+</script>
+
+</body>
+</html>
