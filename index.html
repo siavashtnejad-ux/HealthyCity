@@ -113,8 +113,6 @@ input{font-family:inherit;}
 }
 .stat-line{display:flex;justify-content:space-between;align-items:center;font-size:.88rem;}
 .stat-line b{font-size:1rem;}
-.progress-track{height:9px;background:var(--border);border-radius:6px;overflow:hidden;}
-.progress-fill{height:100%;background:var(--primary);border-radius:6px;transition:width .3s;}
 .band-analysis{font-size:.82rem;color:var(--text-mute);border-top:1px dashed var(--border);padding-top:10px;}
 
 /* ===== Toolbar ===== */
@@ -383,8 +381,6 @@ footer.app-footer{
     </div>
     <div class="stats-card">
       <div class="stat-line"><span>شاخص‌های پاسخ داده شده</span><span id="answeredStat"><b>۰ / ۸۰</b></span></div>
-      <div class="progress-track"><div class="progress-fill" id="progressFill" style="width:0%;"></div></div>
-      <div class="stat-line"><span>درصد پیشرفت</span><span id="progressPct"><b>۰٪</b></span></div>
       <div class="band-analysis" id="bandAnalysis">برای مشاهده تحلیل، ارزیابی را آغاز کنید.</div>
     </div>
   </div>
@@ -633,9 +629,6 @@ function refreshAll(){
 
   document.getElementById('gaugeScore').textContent = pd(total);
   document.getElementById('answeredStat').innerHTML = `<b>${pd(answered)} / ${pd(DATA.totalItems)}</b>`;
-  const pct = Math.round((answered/DATA.totalItems)*100);
-  document.getElementById('progressPct').innerHTML = `<b>${pd(pct)}٪</b>`;
-  document.getElementById('progressFill').style.width = pct + '%';
 
   const band = getBandForScore(total);
   const cls = bandColorClass(band.label);
