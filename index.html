@@ -113,6 +113,8 @@ input{font-family:inherit;}
 }
 .stat-line{display:flex;justify-content:space-between;align-items:center;font-size:.88rem;}
 .stat-line b{font-size:1rem;}
+.progress-track{height:9px;background:var(--border);border-radius:6px;overflow:hidden;}
+.progress-fill{height:100%;background:var(--primary);border-radius:6px;transition:width .3s;}
 .band-analysis{font-size:.82rem;color:var(--text-mute);border-top:1px dashed var(--border);padding-top:10px;}
 
 /* ===== Toolbar ===== */
@@ -195,13 +197,9 @@ input{font-family:inherit;}
 .reco-box{
   max-width:980px;margin:0 auto 26px;padding:16px 20px;
 }
-.reco-card{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);padding:18px;border-right:5px solid var(--primary);transition:background .25s, border-color .25s;}
+.reco-card{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);padding:18px;border-right:5px solid var(--primary);}
 .reco-card h3{margin:0 0 10px;font-size:.95rem;}
 .reco-card ul{margin:0;padding-inline-start:20px;font-size:.83rem;color:var(--text-mute);display:flex;flex-direction:column;gap:6px;}
-.reco-card.b-red{background:var(--red-bg);border-right-color:var(--red);}
-.reco-card.b-orange{background:var(--orange-bg);border-right-color:var(--orange);}
-.reco-card.b-yellow{background:var(--yellow-bg);border-right-color:var(--yellow);}
-.reco-card.b-green{background:var(--green-bg);border-right-color:var(--green);}
 
 /* ===== Modal ===== */
 .overlay{
@@ -385,6 +383,8 @@ footer.app-footer{
     </div>
     <div class="stats-card">
       <div class="stat-line"><span>شاخص‌های پاسخ داده شده</span><span id="answeredStat"><b>۰ / ۸۰</b></span></div>
+      <div class="progress-track"><div class="progress-fill" id="progressFill" style="width:0%;"></div></div>
+      <div class="stat-line"><span>درصد پیشرفت</span><span id="progressPct"><b>۰٪</b></span></div>
       <div class="band-analysis" id="bandAnalysis">برای مشاهده تحلیل، ارزیابی را آغاز کنید.</div>
     </div>
   </div>
@@ -404,7 +404,7 @@ footer.app-footer{
   </section>
 
   <section class="reco-box">
-    <div class="reco-card" id="recoCard">
+    <div class="reco-card">
       <h3 id="recoTitle">توصیه‌ها</h3>
       <ul id="recoList"></ul>
     </div>
@@ -633,6 +633,9 @@ function refreshAll(){
 
   document.getElementById('gaugeScore').textContent = pd(total);
   document.getElementById('answeredStat').innerHTML = `<b>${pd(answered)} / ${pd(DATA.totalItems)}</b>`;
+  const pct = Math.round((answered/DATA.totalItems)*100);
+  document.getElementById('progressPct').innerHTML = `<b>${pd(pct)}٪</b>`;
+  document.getElementById('progressFill').style.width = pct + '%';
 
   const band = getBandForScore(total);
   const cls = bandColorClass(band.label);
@@ -662,11 +665,8 @@ function refreshAll(){
 
   // recommendations
   const recoBox = document.getElementById('recoList');
-  const recoCard = document.getElementById('recoCard');
   recoBox.innerHTML = '';
-  recoCard.classList.remove('b-red','b-orange','b-yellow','b-green');
   if (answered>0){
-    recoCard.classList.add('b-' + cls);
     band.recommendations.forEach(r => {
       const li = document.createElement('li');
       li.textContent = r;
@@ -1212,7 +1212,6 @@ const tabAssessBtn = document.getElementById('tabAssessBtn');
 const tabMapBtn = document.getElementById('tabMapBtn');
 const assessmentView = document.getElementById('assessmentView');
 const mapView = document.getElementById('mapView');
-let mapLoadedOnce = false;
 tabAssessBtn.addEventListener('click', () => {
   tabAssessBtn.classList.add('is-active');
   tabMapBtn.classList.remove('is-active');
@@ -1222,7 +1221,7 @@ tabMapBtn.addEventListener('click', () => {
   tabMapBtn.classList.add('is-active');
   tabAssessBtn.classList.remove('is-active');
   mapView.style.display = ''; assessmentView.style.display = 'none';
-  if (!mapLoadedOnce){ mapLoadedOnce = true; refreshMap(); }
+  refreshMap();
 });
 
 </script>
