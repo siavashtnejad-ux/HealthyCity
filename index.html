@@ -410,9 +410,91 @@ footer.app-footer{
 .report-legend-item{ display:flex;align-items:center;gap:6px;font-size:.78rem;color:var(--text-mute); }
 .report-legend-swatch{ width:11px;height:11px;border-radius:3px;flex:0 0 auto; }
 
+/* ===== Login ===== */
+.login-overlay{
+  position:fixed;inset:0;background:rgba(20,40,35,.55);
+  display:flex;align-items:center;justify-content:center;z-index:1000;
+  padding:20px;
+}
+.login-card{
+  background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow-lg);
+  padding:28px;width:100%;max-width:380px;
+}
+.login-card h2{ margin:0 0 6px;font-size:1.1rem; }
+.login-sub{ margin:0 0 18px;font-size:.82rem;color:var(--text-mute); }
+.login-field{ margin-bottom:14px;display:flex;flex-direction:column;gap:6px; }
+.login-field label{ font-size:.82rem;font-weight:600;color:var(--text); }
+.login-field input, .login-field select{
+  font-family:inherit;font-size:.9rem;padding:10px 12px;border-radius:10px;
+  border:1.5px solid var(--border);background:var(--bg);color:var(--text);
+}
+.login-error{
+  background:var(--red-bg);color:var(--red);border-radius:10px;padding:9px 12px;
+  font-size:.82rem;margin-bottom:12px;
+}
+.login-submit{ width:100%;justify-content:center;padding:11px;font-size:.92rem; }
+.login-tabs{ display:flex;gap:8px;margin-bottom:16px;background:var(--bg);border-radius:10px;padding:4px; }
+.login-tab{
+  flex:1;text-align:center;padding:8px;border-radius:8px;font-size:.85rem;font-weight:600;
+  color:var(--text-mute);cursor:pointer;
+}
+.login-tab.is-active{ background:var(--primary);color:#fff; }
+.login-note{
+  background:var(--primary-light);color:var(--primary-dark);border-radius:10px;padding:9px 12px;
+  font-size:.76rem;margin-bottom:12px;line-height:1.7;
+}
+
+/* ===== Header user info ===== */
+.user-info-row{
+  max-width:980px;margin:10px auto 0;
+  display:flex;align-items:center;gap:10px;flex-wrap:wrap;
+  background:rgba(255,255,255,.12);border-radius:12px;padding:8px 14px;
+  font-size:.82rem;color:#fff;
+}
+.role-badge{
+  padding:3px 10px;border-radius:20px;font-size:.75rem;font-weight:700;
+  background:rgba(255,255,255,.22);
+}
+.user-info-row #logoutBtn{ margin-inline-start:auto;padding:6px 12px;font-size:.78rem; }
+
 </style>
 </head>
 <body>
+<div class="login-overlay" id="loginOverlay">
+  <div class="login-card">
+    <h2>🔐 ورود به سامانه خودارزیابی شهر سالم</h2>
+    <p class="login-sub" id="loginModeHint">برای استفاده از سامانه، وارد حساب کاربری خود شوید.</p>
+
+    <div class="login-tabs">
+      <button type="button" class="login-tab is-active" id="loginTabSignin">ورود</button>
+      <button type="button" class="login-tab" id="loginTabSignup">ثبت‌نام</button>
+    </div>
+
+    <div class="login-field" id="loginNameField" style="display:none">
+      <label for="loginName">نام و نام خانوادگی</label>
+      <input type="text" id="loginName" placeholder="مثلاً: علی محمدی">
+    </div>
+    <div class="login-field" id="loginEmailField">
+      <label for="loginEmail">ایمیل</label>
+      <input type="email" id="loginEmail" placeholder="name@example.com" dir="ltr">
+    </div>
+    <div class="login-field" id="loginNationalIdField" style="display:none">
+      <label for="loginNationalId">شماره ملی</label>
+      <input type="text" id="loginNationalId" placeholder="۱۰ رقم" inputmode="numeric" maxlength="10" dir="ltr">
+    </div>
+    <div class="login-field" id="loginPasswordField">
+      <label for="loginPassword">رمز عبور</label>
+      <input type="password" id="loginPassword" placeholder="حداقل ۶ کاراکتر" dir="ltr">
+    </div>
+
+    <p class="login-note" id="loginSignupNote" style="display:none">
+      حساب‌های جدید همیشه با سطح دسترسی «ارزیاب» ساخته می‌شوند. ارتقا به «کارشناس یک» یا «کارشناس دو» فقط توسط مدیر سامانه انجام می‌شود.
+    </p>
+
+    <div class="login-error" id="loginError" style="display:none"></div>
+    <button class="btn btn-solid login-submit" id="loginSubmitBtn" type="button">ورود</button>
+  </div>
+</div>
 <div id="app">
 
   <div class="print-header" id="printHeader">
@@ -449,13 +531,18 @@ footer.app-footer{
       <label>تاریخ ارزیابی:</label>
       <div id="dateDisplay"></div>
     </div>
+    <div class="user-info-row" id="userInfoRow" style="display:none">
+      <span id="userInfoText"></span>
+      <span class="role-badge" id="userRoleBadge"></span>
+      <button class="btn btn-outline" id="logoutBtn" type="button">خروج</button>
+    </div>
   </header>
 
   <div class="view-tabs">
-    <button type="button" class="view-tab is-active" id="tabAssessBtn">تکمیل ارزیابی</button>
-    <button type="button" class="view-tab" id="tabMapBtn">نقشهٔ امتیازها</button>
-    <button type="button" class="view-tab" id="tabCompareBtn">مقایسه شهرها</button>
-    <button type="button" class="view-tab" id="tabReportBtn">گزارش نموداری</button>
+    <button type="button" class="view-tab is-active" id="tabAssessBtn" data-min-level="1">تکمیل ارزیابی</button>
+    <button type="button" class="view-tab" id="tabMapBtn" data-min-level="2">نقشهٔ امتیازها</button>
+    <button type="button" class="view-tab" id="tabCompareBtn" data-min-level="2">مقایسه شهرها</button>
+    <button type="button" class="view-tab" id="tabReportBtn" data-min-level="3">گزارش نموداری</button>
   </div>
 
   <div id="assessmentView">
@@ -584,6 +671,7 @@ footer.app-footer{
 
 <div id="toast"></div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <script>
 // Deploy HealthyCityGoogleAppsScript.gs as a Web App, then paste its /exec URL here.
 const GOOGLE_SHEETS_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbxem2K_V3rPZUnbueeakmqo975t5jbR7AcdkweJr-ro8JRuJ_BBckUe7HA3zaLPIC7g/exec';
@@ -941,6 +1029,9 @@ async function saveAssessment(){
   const date = document.getElementById('dateDisplay').textContent;
   const total = Object.values(scores).reduce((a,b)=>a+b,0);
   const answered = Object.keys(scores).length;
+  const currentUser = currentProfile
+    ? { name: currentProfile.name, email: currentAuthEmail, nationalId: currentProfile.national_id, role: currentProfile.role }
+    : null;
   const entry = {
     id: Date.now(),
     name,
@@ -952,7 +1043,8 @@ async function saveAssessment(){
     answered,
     totalItems: DATA.totalItems,
     status: getBandForScore(total).label,
-    savedAt: new Date().toISOString()
+    savedAt: new Date().toISOString(),
+    loggedInBy: currentUser ? { name: currentUser.name, email: currentUser.email, nationalId: currentUser.nationalId, role: currentUser.role } : null
   };
   const list = getSavedList();
   list.unshift(entry);
@@ -975,6 +1067,7 @@ function openLoadModal(){
     list.forEach(entry => {
       const row = document.createElement('div');
       row.className = 'modal-item';
+      const canDelete = currentProfile && roleLevel(currentProfile.role) >= 2;
       row.innerHTML = `
         <div>
           <div><b>${entry.name}</b>${entry.city ? ' — ' + entry.city : ''}</div>
@@ -982,7 +1075,7 @@ function openLoadModal(){
         </div>
         <div style="display:flex;gap:10px;align-items:center;">
           <span class="load-btn">بارگذاری</span>
-          <button title="حذف">🗑</button>
+          ${canDelete ? '<button title="حذف">🗑</button>' : ''}
         </div>
       `;
       row.querySelector('.load-btn').onclick = () => {
@@ -995,11 +1088,14 @@ function openLoadModal(){
         closeModal();
         showToast('ارزیابی بارگذاری شد');
       };
-      row.querySelector('button').onclick = () => {
-        const l2 = getSavedList().filter(e => e.id !== entry.id);
-        setSavedList(l2);
-        openLoadModal();
-      };
+      const delBtn = row.querySelector('button');
+      if (delBtn){
+        delBtn.onclick = () => {
+          const l2 = getSavedList().filter(e => e.id !== entry.id);
+          setSavedList(l2);
+          openLoadModal();
+        };
+      }
       wrap.appendChild(row);
     });
   }
@@ -1018,6 +1114,7 @@ function resetAll(){
 
 /* ---------------- Init ---------------- */
 document.addEventListener('DOMContentLoaded', () => {
+  initAuth();
   loadDraft();
   buildDomains();
   buildGuide();
@@ -1722,6 +1819,249 @@ document.getElementById('reportClearBtn').addEventListener('click', () => {
   renderReportChart();
 });
 document.getElementById('reportRefreshBtn').addEventListener('click', loadReportRecords);
+
+/* =========================================================
+   Login & 3-level access control — backed by Supabase Auth
+   ========================================================= */
+const SUPABASE_URL = 'https://ulhlmzvgiaofrclfvoox.supabase.co';
+const SUPABASE_ANON_KEY = 'sb_publishable_Tw8e07GmeCKW79HgMPLKSw_ydgLdC99';
+const PROFILE_TABLE = 'healthy_city_profiles';
+const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+const ROLE_LEVELS = { 'ارزیاب': 1, 'کارشناس یک': 2, 'کارشناس دو': 3 };
+function roleLevel(role){ return ROLE_LEVELS[role] || 1; }
+
+let currentProfile = null;   // { id, name, national_id, role } — the authoritative, server-verified profile
+let currentAuthEmail = null;
+let loginStage = 'signin';   // 'signin' | 'signup' | 'complete-profile'
+let pendingAuthUser = null;  // set while stage === 'complete-profile'
+
+function isValidEmail(email){
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(email).trim());
+}
+
+/* Standard Iranian national-ID (کد ملی) checksum validation */
+function isValidNationalId(code){
+  code = String(code).trim();
+  if (!/^\d{10}$/.test(code)) return false;
+  if (/^(\d)\1{9}$/.test(code)) return false;
+  const check = parseInt(code[9], 10);
+  let sum = 0;
+  for (let i = 0; i < 9; i++) sum += parseInt(code[i], 10) * (10 - i);
+  const remainder = sum % 11;
+  return (remainder < 2 && check === remainder) || (remainder >= 2 && check === (11 - remainder));
+}
+
+function showLoginOverlay(){ document.getElementById('loginOverlay').style.display = 'flex'; }
+function hideLoginOverlay(){ document.getElementById('loginOverlay').style.display = 'none'; }
+
+function showLoginError(msg){
+  const errEl = document.getElementById('loginError');
+  errEl.textContent = msg;
+  errEl.style.display = '';
+}
+function clearLoginError(){ document.getElementById('loginError').style.display = 'none'; }
+
+function updateUserInfoUI(profile, email){
+  const row = document.getElementById('userInfoRow');
+  if (!profile){ row.style.display = 'none'; return; }
+  row.style.display = '';
+  document.getElementById('userInfoText').textContent = `${profile.name} — ${email || ''}`;
+  document.getElementById('userRoleBadge').textContent = `${profile.role} (سطح ${pd(roleLevel(profile.role))})`;
+}
+
+function applyAccessControl(profile){
+  const level = profile ? roleLevel(profile.role) : 0;
+  document.querySelectorAll('.view-tab').forEach(btn => {
+    const min = parseInt(btn.dataset.minLevel || '1', 10);
+    btn.style.display = (level >= min) ? '' : 'none';
+  });
+  const activeBtn = document.querySelector('.view-tab.is-active');
+  if (activeBtn && activeBtn.style.display === 'none'){
+    activateTab(tabAssessBtn, assessmentView);
+  }
+}
+
+function renderLoginStage(stage){
+  loginStage = stage;
+  clearLoginError();
+  const tabs = document.querySelector('.login-tabs');
+  const nameField = document.getElementById('loginNameField');
+  const emailField = document.getElementById('loginEmailField');
+  const nationalIdField = document.getElementById('loginNationalIdField');
+  const passwordField = document.getElementById('loginPasswordField');
+  const note = document.getElementById('loginSignupNote');
+  const hint = document.getElementById('loginModeHint');
+  const submitBtn = document.getElementById('loginSubmitBtn');
+  const signinTab = document.getElementById('loginTabSignin');
+  const signupTab = document.getElementById('loginTabSignup');
+
+  if (stage === 'signin'){
+    tabs.style.display = '';
+    signinTab.classList.add('is-active'); signupTab.classList.remove('is-active');
+    nameField.style.display = 'none';
+    emailField.style.display = '';
+    nationalIdField.style.display = 'none';
+    passwordField.style.display = '';
+    note.style.display = 'none';
+    hint.textContent = 'برای استفاده از سامانه، وارد حساب کاربری خود شوید.';
+    submitBtn.textContent = 'ورود';
+  } else if (stage === 'signup'){
+    tabs.style.display = '';
+    signupTab.classList.add('is-active'); signinTab.classList.remove('is-active');
+    nameField.style.display = '';
+    emailField.style.display = '';
+    nationalIdField.style.display = '';
+    passwordField.style.display = '';
+    note.style.display = '';
+    hint.textContent = 'برای ساخت حساب کاربری جدید، مشخصات خود را وارد کنید.';
+    submitBtn.textContent = 'ثبت‌نام';
+  } else if (stage === 'complete-profile'){
+    tabs.style.display = 'none';
+    nameField.style.display = '';
+    emailField.style.display = 'none';
+    nationalIdField.style.display = '';
+    passwordField.style.display = 'none';
+    note.style.display = '';
+    hint.textContent = 'ورود شما تأیید شد. برای تکمیل حساب، این اطلاعات را وارد کنید.';
+    submitBtn.textContent = 'تکمیل ثبت‌نام و ورود';
+  }
+}
+
+async function fetchProfile(userId){
+  const { data, error } = await sb.from(PROFILE_TABLE)
+    .select('id,name,national_id,role')
+    .eq('id', userId)
+    .maybeSingle();
+  if (error){ console.warn('fetchProfile error:', error); return null; }
+  return data;
+}
+
+async function insertProfile(userId, name, nationalId){
+  // role is intentionally omitted — the database defaults (and enforces via RLS) 'ارزیاب'.
+  const { data, error } = await sb.from(PROFILE_TABLE)
+    .insert({ id: userId, name, national_id: nationalId })
+    .select('id,name,national_id,role')
+    .single();
+  return { data, error };
+}
+
+async function handleAuthenticatedSession(session){
+  const user = session.user;
+  currentAuthEmail = user.email;
+  const profile = await fetchProfile(user.id);
+  if (!profile){
+    pendingAuthUser = user;
+    renderLoginStage('complete-profile');
+    return;
+  }
+  currentProfile = profile;
+  hideLoginOverlay();
+  updateUserInfoUI(profile, user.email);
+  applyAccessControl(profile);
+  const assessorInput = document.getElementById('assessorName');
+  if (assessorInput && !assessorInput.value.trim()) assessorInput.value = profile.name;
+}
+
+async function submitLogin(){
+  clearLoginError();
+  const submitBtn = document.getElementById('loginSubmitBtn');
+  submitBtn.disabled = true;
+  try {
+    if (loginStage === 'signin'){
+      const email = document.getElementById('loginEmail').value.trim();
+      const password = document.getElementById('loginPassword').value;
+      if (!isValidEmail(email)){ showLoginError('ایمیل واردشده معتبر نیست.'); return; }
+      if (!password){ showLoginError('لطفاً رمز عبور را وارد کنید.'); return; }
+      const { data, error } = await sb.auth.signInWithPassword({ email, password });
+      if (error){ showLoginError('ورود ناموفق بود: ایمیل یا رمز عبور نادرست است.'); return; }
+      await handleAuthenticatedSession(data.session);
+
+    } else if (loginStage === 'signup'){
+      const name = document.getElementById('loginName').value.trim();
+      const email = document.getElementById('loginEmail').value.trim();
+      const nationalId = document.getElementById('loginNationalId').value.trim();
+      const password = document.getElementById('loginPassword').value;
+      if (!name){ showLoginError('لطفاً نام و نام خانوادگی را وارد کنید.'); return; }
+      if (!isValidEmail(email)){ showLoginError('ایمیل واردشده معتبر نیست.'); return; }
+      if (!isValidNationalId(nationalId)){ showLoginError('شماره ملی واردشده معتبر نیست (باید ۱۰ رقم و صحیح باشد).'); return; }
+      if (!password || password.length < 6){ showLoginError('رمز عبور باید حداقل ۶ کاراکتر باشد.'); return; }
+
+      const { data, error } = await sb.auth.signUp({ email, password });
+      if (error){ showLoginError('ثبت‌نام ناموفق بود: ' + (error.message || '')); return; }
+
+      if (data.session){
+        // Email confirmation is disabled on this project — we have an active session now.
+        const { error: insErr } = await insertProfile(data.user.id, name, nationalId);
+        if (insErr){
+          showLoginError('حساب ساخته شد اما تکمیل پروفایل ناموفق بود: ' + (insErr.message || ''));
+          return;
+        }
+        await handleAuthenticatedSession(data.session);
+        showToast('ثبت‌نام و ورود با موفقیت انجام شد');
+      } else {
+        // Email confirmation required — profile will be completed on first real sign-in.
+        showLoginError('یک ایمیل تأیید برای شما ارسال شد. لطفاً پس از تأیید، از تب «ورود» وارد شوید.');
+        renderLoginStage('signin');
+        document.getElementById('loginEmail').value = email;
+      }
+
+    } else if (loginStage === 'complete-profile'){
+      const name = document.getElementById('loginName').value.trim();
+      const nationalId = document.getElementById('loginNationalId').value.trim();
+      if (!name){ showLoginError('لطفاً نام و نام خانوادگی را وارد کنید.'); return; }
+      if (!isValidNationalId(nationalId)){ showLoginError('شماره ملی واردشده معتبر نیست (باید ۱۰ رقم و صحیح باشد).'); return; }
+      const { data, error } = await insertProfile(pendingAuthUser.id, name, nationalId);
+      if (error){ showLoginError('تکمیل پروفایل ناموفق بود: ' + (error.message || '')); return; }
+      currentProfile = data;
+      hideLoginOverlay();
+      updateUserInfoUI(data, currentAuthEmail);
+      applyAccessControl(data);
+      const assessorInput = document.getElementById('assessorName');
+      if (assessorInput && !assessorInput.value.trim()) assessorInput.value = data.name;
+      showToast('ثبت‌نام تکمیل شد و وارد شدید');
+    }
+  } catch (e){
+    showLoginError('خطای غیرمنتظره‌ای رخ داد. دوباره تلاش کنید.');
+    console.error(e);
+  } finally {
+    submitBtn.disabled = false;
+  }
+}
+
+async function initAuth(){
+  applyAccessControl(null);
+  const { data, error } = await sb.auth.getSession();
+  if (error || !data.session){
+    renderLoginStage('signin');
+    showLoginOverlay();
+    return;
+  }
+  await handleAuthenticatedSession(data.session);
+}
+
+document.getElementById('loginTabSignin').addEventListener('click', () => renderLoginStage('signin'));
+document.getElementById('loginTabSignup').addEventListener('click', () => renderLoginStage('signup'));
+document.getElementById('loginSubmitBtn').addEventListener('click', submitLogin);
+document.querySelectorAll('.login-field input').forEach(inp => {
+  inp.addEventListener('keydown', e => { if (e.key === 'Enter') submitLogin(); });
+});
+document.getElementById('logoutBtn').addEventListener('click', async () => {
+  if (!confirm('از سامانه خارج می‌شوید؟')) return;
+  await sb.auth.signOut();
+  currentProfile = null;
+  currentAuthEmail = null;
+  pendingAuthUser = null;
+  updateUserInfoUI(null);
+  applyAccessControl(null);
+  document.getElementById('loginName').value = '';
+  document.getElementById('loginEmail').value = '';
+  document.getElementById('loginNationalId').value = '';
+  document.getElementById('loginPassword').value = '';
+  clearLoginError();
+  renderLoginStage('signin');
+  showLoginOverlay();
+});
 
 </script>
 
