@@ -443,6 +443,24 @@ footer.app-footer{
   background:var(--primary-light);color:var(--primary-dark);border-radius:10px;padding:9px 12px;
   font-size:.76rem;margin-bottom:12px;line-height:1.7;
 }
+.login-status-block{ text-align:center;padding:6px 0; }
+.login-status-icon{ font-size:2.2rem;margin-bottom:10px; }
+.login-status-block p{ font-size:.86rem;color:var(--text);line-height:1.9;margin:0 0 16px; }
+
+/* ===== Admin approvals ===== */
+.approval-item{
+  display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;
+  padding:12px 0;border-top:1px solid var(--border);
+}
+.approval-item:first-child{ border-top:none; }
+.approval-item .ai-meta{ font-size:.78rem;color:var(--text-mute);line-height:1.8; }
+.approval-item .ai-meta b{ color:var(--text);font-size:.88rem; }
+.approval-item .ai-actions{ display:flex;gap:8px;flex-shrink:0; }
+.approval-item .ai-actions button{
+  padding:7px 14px;border-radius:9px;font-size:.8rem;font-weight:700;
+}
+.approval-item .ai-approve{ background:var(--green-bg);color:var(--green); }
+.approval-item .ai-reject{ background:var(--red-bg);color:var(--red); }
 
 /* ===== Header user info ===== */
 .user-info-row{
@@ -501,6 +519,12 @@ footer.app-footer{
 
     <div class="login-error" id="loginError" style="display:none"></div>
     <button class="btn btn-solid login-submit" id="loginSubmitBtn" type="button">ورود</button>
+
+    <div class="login-status-block" id="loginStatusBlock" style="display:none">
+      <div class="login-status-icon" id="loginStatusIcon">⏳</div>
+      <p id="loginStatusText"></p>
+      <button class="btn btn-outline login-submit" id="loginStatusLogoutBtn" type="button">خروج</button>
+    </div>
   </div>
 </div>
 <div id="app">
@@ -542,6 +566,7 @@ footer.app-footer{
     <div class="user-info-row" id="userInfoRow" style="display:none">
       <span id="userInfoText"></span>
       <span class="role-badge" id="userRoleBadge"></span>
+      <button class="btn btn-outline" id="adminApprovalsBtn" type="button" style="display:none">✅ تأیید درخواست‌ها</button>
       <button class="btn btn-outline" id="logoutBtn" type="button">خروج</button>
     </div>
   </header>
@@ -674,6 +699,14 @@ footer.app-footer{
     <h3>ارزیابی‌های ذخیره‌شده</h3>
     <div class="modal-list" id="modalList"></div>
     <button class="modal-close" id="modalCloseBtn">بستن</button>
+  </div>
+</div>
+
+<div class="overlay" id="approvalsModalOverlay">
+  <div class="modal">
+    <h3>✅ درخواست‌های دسترسی در انتظار تأیید</h3>
+    <div id="approvalsList" class="modal-list"></div>
+    <button class="modal-close" id="approvalsModalCloseBtn">بستن</button>
   </div>
 </div>
 
@@ -1884,6 +1917,7 @@ function applyAccessControl(profile){
     const min = parseInt(btn.dataset.minLevel || '1', 10);
     btn.style.display = (level >= min) ? '' : 'none';
   });
+  document.getElementById('adminApprovalsBtn').style.display = (profile && profile.is_admin) ? '' : 'none';
   const activeBtn = document.querySelector('.view-tab.is-active');
   if (activeBtn && activeBtn.style.display === 'none'){
     activateTab(tabAssessBtn, assessmentView);
@@ -1893,6 +1927,7 @@ function applyAccessControl(profile){
 function renderLoginStage(stage){
   loginStage = stage;
   clearLoginError();
+  hideAccountStatusBlock();
   const tabs = document.querySelector('.login-tabs');
   const nameField = document.getElementById('loginNameField');
   const emailField = document.getElementById('loginEmailField');
@@ -1942,7 +1977,7 @@ function renderLoginStage(stage){
 
 async function fetchProfile(userId){
   const { data, error } = await sb.from(PROFILE_TABLE)
-    .select('id,name,national_id,role')
+    .select('id,name,national_id,role,status,is_admin')
     .eq('id', userId)
     .maybeSingle();
   if (error){ console.warn('fetchProfile error:', error); return null; }
@@ -1950,32 +1985,81 @@ async function fetchProfile(userId){
 }
 
 async function insertProfile(userId, name, nationalId){
-  // The hc_handle_new_user trigger already created this row at signup time (role='ارزیاب').
-  // The client only ever fills in name/national_id here — it has no INSERT policy on this
-  // table on purpose, so it cannot create arbitrary profile rows or set its own role.
+  // The hc_handle_new_user trigger already created this row at signup time (role decided by
+  // the caller, status auto-set to pending for کارشناس یک/دو). The client only ever fills in
+  // name/national_id here — it has no INSERT policy on this table on purpose, so it cannot
+  // create arbitrary profile rows or set its own role/status/admin flag.
   const { data, error } = await sb.from(PROFILE_TABLE)
     .update({ name, national_id: nationalId })
     .eq('id', userId)
-    .select('id,name,national_id,role')
+    .select('id,name,national_id,role,status,is_admin')
     .single();
   return { data, error };
+}
+
+function showAccountStatusBlock(status){
+  document.querySelector('.login-tabs').style.display = 'none';
+  ['loginNameField','loginEmailField','loginNationalIdField','loginRoleField','loginPasswordField'].forEach(id => {
+    document.getElementById(id).style.display = 'none';
+  });
+  document.getElementById('loginSignupNote').style.display = 'none';
+  document.getElementById('loginError').style.display = 'none';
+  document.getElementById('loginSubmitBtn').style.display = 'none';
+  document.getElementById('loginModeHint').style.display = 'none';
+
+  const icon = document.getElementById('loginStatusIcon');
+  const text = document.getElementById('loginStatusText');
+  if (status === 'pending'){
+    icon.textContent = '⏳';
+    text.textContent = 'درخواست شما برای سطح دسترسی بالاتر ثبت شد و در انتظار تأیید مدیر سامانه است. پس از تأیید می‌توانید وارد شوید.';
+  } else {
+    icon.textContent = '⛔';
+    text.textContent = 'درخواست دسترسی شما توسط مدیر سامانه تأیید نشد. برای اطلاعات بیشتر با مدیر سامانه تماس بگیرید.';
+  }
+  document.getElementById('loginStatusBlock').style.display = '';
+  showLoginOverlay();
+}
+
+function hideAccountStatusBlock(){
+  document.getElementById('loginStatusBlock').style.display = 'none';
+  document.getElementById('loginModeHint').style.display = '';
+  document.getElementById('loginSubmitBtn').style.display = '';
+  const tabs = document.querySelector('.login-tabs');
+  if (tabs) tabs.style.display = '';
+}
+
+/* Shared by sign-in, sign-up and the complete-profile fallback: only ever grants access to the
+   app when the account's status is 'active' — کارشناس یک/دو accounts sit behind this until an
+   admin approves them, regardless of which path got them here. Returns true if access granted. */
+function finalizeProfileAccess(profile, email){
+  if (profile.status === 'pending' || profile.status === 'rejected'){
+    currentProfile = null;
+    showAccountStatusBlock(profile.status);
+    return false;
+  }
+  hideAccountStatusBlock();
+  currentProfile = profile;
+  hideLoginOverlay();
+  updateUserInfoUI(profile, email);
+  applyAccessControl(profile);
+  const assessorInput = document.getElementById('assessorName');
+  if (assessorInput && !assessorInput.value.trim()) assessorInput.value = profile.name;
+  return true;
 }
 
 async function handleAuthenticatedSession(session){
   const user = session.user;
   currentAuthEmail = user.email;
   const profile = await fetchProfile(user.id);
-  if (!profile){
+  if (!profile || !profile.name || !profile.national_id){
+    // Either the profile row doesn't exist yet, or it does but was never filled in — this
+    // happens whenever email confirmation was required, since the original signup submission
+    // couldn't save name/national_id without an active session at that moment.
     pendingAuthUser = user;
     renderLoginStage('complete-profile');
     return;
   }
-  currentProfile = profile;
-  hideLoginOverlay();
-  updateUserInfoUI(profile, user.email);
-  applyAccessControl(profile);
-  const assessorInput = document.getElementById('assessorName');
-  if (assessorInput && !assessorInput.value.trim()) assessorInput.value = profile.name;
+  finalizeProfileAccess(profile, user.email);
 }
 
 async function submitLogin(){
@@ -2014,7 +2098,9 @@ async function submitLogin(){
           return;
         }
         await handleAuthenticatedSession(data.session);
-        showToast('ثبت‌نام و ورود با موفقیت انجام شد');
+        if (currentProfile){
+          showToast('ثبت‌نام و ورود با موفقیت انجام شد');
+        }
       } else {
         // Email confirmation required — profile will be completed on first real sign-in.
         showLoginError('یک ایمیل تأیید برای شما ارسال شد. لطفاً پس از تأیید، از تب «ورود» وارد شوید.');
@@ -2029,13 +2115,10 @@ async function submitLogin(){
       if (!isValidNationalId(nationalId)){ showLoginError('شماره ملی واردشده معتبر نیست (باید ۱۰ رقم و صحیح باشد).'); return; }
       const { data, error } = await insertProfile(pendingAuthUser.id, name, nationalId);
       if (error){ showLoginError('تکمیل پروفایل ناموفق بود: ' + (error.message || '')); return; }
-      currentProfile = data;
-      hideLoginOverlay();
-      updateUserInfoUI(data, currentAuthEmail);
-      applyAccessControl(data);
-      const assessorInput = document.getElementById('assessorName');
-      if (assessorInput && !assessorInput.value.trim()) assessorInput.value = data.name;
-      showToast('ثبت‌نام تکمیل شد و وارد شدید');
+      const granted = finalizeProfileAccess(data, currentAuthEmail);
+      if (granted){
+        showToast('ثبت‌نام تکمیل شد و وارد شدید');
+      }
     }
   } catch (e){
     showLoginError('خطای غیرمنتظره‌ای رخ داد. دوباره تلاش کنید.');
@@ -2062,8 +2145,7 @@ document.getElementById('loginSubmitBtn').addEventListener('click', submitLogin)
 document.querySelectorAll('.login-field input').forEach(inp => {
   inp.addEventListener('keydown', e => { if (e.key === 'Enter') submitLogin(); });
 });
-document.getElementById('logoutBtn').addEventListener('click', async () => {
-  if (!confirm('از سامانه خارج می‌شوید؟')) return;
+async function performLogout(){
   await sb.auth.signOut();
   currentProfile = null;
   currentAuthEmail = null;
@@ -2077,6 +2159,73 @@ document.getElementById('logoutBtn').addEventListener('click', async () => {
   clearLoginError();
   renderLoginStage('signin');
   showLoginOverlay();
+}
+
+document.getElementById('logoutBtn').addEventListener('click', async () => {
+  if (!confirm('از سامانه خارج می‌شوید؟')) return;
+  await performLogout();
+});
+document.getElementById('loginStatusLogoutBtn').addEventListener('click', performLogout);
+
+/* ---------------- Admin approvals (is_admin only) ---------------- */
+async function loadApprovalsList(){
+  const wrap = document.getElementById('approvalsList');
+  wrap.innerHTML = '<div class="modal-empty">در حال بارگذاری…</div>';
+  const { data, error } = await sb.from(PROFILE_TABLE)
+    .select('id,name,email,national_id,role,created_at')
+    .eq('status', 'pending')
+    .order('created_at', { ascending: true });
+  if (error){
+    wrap.innerHTML = '<div class="modal-empty">خطا در بارگذاری فهرست: ' + (error.message || '') + '</div>';
+    return;
+  }
+  if (!data || data.length === 0){
+    wrap.innerHTML = '<div class="modal-empty">درخواست در انتظار تأییدی وجود ندارد.</div>';
+    return;
+  }
+  wrap.innerHTML = '';
+  data.forEach(row => {
+    const item = document.createElement('div');
+    item.className = 'approval-item';
+    item.innerHTML = `
+      <div class="ai-meta">
+        <b>${row.name || '—'}</b> — ${row.role}<br>
+        ${row.email || ''}${row.national_id ? ' — کد ملی: ' + row.national_id : ''}
+      </div>
+      <div class="ai-actions">
+        <button class="ai-approve">تأیید</button>
+        <button class="ai-reject">رد</button>
+      </div>
+    `;
+    item.querySelector('.ai-approve').onclick = () => reviewSignup(row.id, 'active');
+    item.querySelector('.ai-reject').onclick = () => reviewSignup(row.id, 'rejected');
+    wrap.appendChild(item);
+  });
+}
+
+async function reviewSignup(targetId, decision){
+  // hc_review_signup itself re-checks server-side that the caller is an admin before doing
+  // anything — this button being visible client-side is just UX, not the real access control.
+  const { error } = await sb.rpc('hc_review_signup', { target_id: targetId, decision });
+  if (error){
+    showToast('خطا: ' + (error.message || 'عملیات ناموفق بود'));
+    return;
+  }
+  showToast(decision === 'active' ? 'درخواست تأیید شد' : 'درخواست رد شد');
+  loadApprovalsList();
+}
+
+function openApprovalsModal(){
+  document.getElementById('approvalsModalOverlay').classList.add('show');
+  loadApprovalsList();
+}
+function closeApprovalsModal(){
+  document.getElementById('approvalsModalOverlay').classList.remove('show');
+}
+document.getElementById('adminApprovalsBtn').addEventListener('click', openApprovalsModal);
+document.getElementById('approvalsModalCloseBtn').addEventListener('click', closeApprovalsModal);
+document.getElementById('approvalsModalOverlay').addEventListener('click', e => {
+  if (e.target.id === 'approvalsModalOverlay') closeApprovalsModal();
 });
 
 </script>
