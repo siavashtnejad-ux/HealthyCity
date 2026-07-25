@@ -317,6 +317,99 @@ footer.app-footer{
   background:var(--bg);color:var(--text);
 }
 
+/* ===== Compare cities ===== */
+.compare-picker{
+  max-width:980px;margin:0 auto;padding:0 20px;
+  display:flex;align-items:flex-end;gap:14px;flex-wrap:wrap;
+}
+.compare-picker-col{ display:flex;flex-direction:column;gap:6px;flex:1;min-width:200px; }
+.compare-picker-col label{ font-size:.82rem;color:var(--text-mute);font-weight:600; }
+.compare-picker-col select{
+  font-family:inherit;font-size:.88rem;padding:10px 12px;border-radius:10px;border:1.5px solid var(--border);
+  background:var(--card);color:var(--text);
+}
+.compare-vs{
+  font-size:.82rem;font-weight:700;color:var(--text-mute);
+  padding:0 4px 10px;white-space:nowrap;
+}
+#compareStatus{
+  max-width:980px;margin:14px auto 0;padding:10px 20px;
+  font-size:.85rem;color:var(--text-mute);text-align:center;
+}
+#compareStatus.err{ color:var(--orange); }
+#compareResults{ max-width:980px;margin:10px auto 0;padding:0 20px; }
+.compare-summary{
+  display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px;
+}
+.compare-summary-card{
+  background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow-lg);
+  padding:18px;text-align:center;
+}
+.compare-summary-card h3{ margin:0 0 4px;font-size:1rem; }
+.compare-summary-card .csc-meta{ font-size:.78rem;color:var(--text-mute);margin-bottom:10px; }
+.compare-summary-card .csc-score{ font-size:1.8rem;font-weight:800;color:var(--primary); }
+.compare-summary-card .csc-max{ font-size:.82rem;color:var(--text-mute); }
+.compare-summary-card .csc-band{
+  display:inline-block;margin-top:8px;padding:4px 12px;border-radius:20px;font-size:.78rem;font-weight:700;
+}
+.compare-summary-card .csc-answered{ font-size:.78rem;color:var(--text-mute);margin-top:8px; }
+.compare-winner{
+  text-align:center;font-size:.9rem;font-weight:700;color:var(--primary);margin-bottom:18px;
+}
+.compare-domain-row{
+  background:var(--card);border-radius:12px;box-shadow:var(--shadow);padding:14px 16px;margin-bottom:10px;
+}
+.compare-domain-title{ font-size:.88rem;font-weight:700;margin-bottom:10px;display:flex;align-items:center;gap:6px; }
+.compare-domain-bars{ display:flex;flex-direction:column;gap:6px; }
+.cdb-line{ display:flex;align-items:center;gap:10px; }
+.cdb-label{ font-size:.75rem;color:var(--text-mute);min-width:70px;white-space:nowrap; }
+.cdb-track{ flex:1;height:14px;background:var(--bg);border-radius:8px;overflow:hidden;border:1px solid var(--border); }
+.cdb-fill{ height:100%;border-radius:8px;transition:width .3s; }
+.cdb-fill.a{ background:var(--primary); }
+.cdb-fill.b{ background:var(--accent); }
+.cdb-val{ font-size:.75rem;font-weight:700;min-width:56px;text-align:left; }
+.compare-empty{
+  text-align:center;padding:40px 20px;color:var(--text-mute);font-size:.9rem;
+}
+
+/* ===== Comparison report (chart) ===== */
+.report-picker{
+  max-width:980px;margin:0 auto;padding:0 20px;
+}
+.report-picker-head{
+  display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:10px;
+}
+.report-picker-head h3{ margin:0;font-size:.95rem; }
+.report-picker-actions{ display:flex;gap:8px;flex-wrap:wrap; }
+.report-picker-actions .btn{ padding:7px 12px;font-size:.78rem;color:var(--primary);border-color:var(--border); }
+.report-city-list{
+  background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);
+  max-height:230px;overflow-y:auto;padding:6px 10px;
+}
+.report-city-item{
+  display:flex;align-items:center;gap:8px;padding:8px 4px;border-top:1px solid var(--border);font-size:.82rem;
+}
+.report-city-item:first-child{ border-top:none; }
+.report-city-item .rci-swatch{ width:12px;height:12px;border-radius:3px;flex:0 0 auto; }
+.report-city-item label{ flex:1;cursor:pointer; }
+.report-empty-list{ text-align:center;padding:16px;color:var(--text-mute);font-size:.85rem; }
+#reportStatus{
+  max-width:980px;margin:14px auto 0;padding:10px 20px;
+  font-size:.85rem;color:var(--text-mute);text-align:center;
+}
+#reportStatus.err{ color:var(--orange); }
+#reportChartArea{ max-width:980px;margin:16px auto 0;padding:0 20px 10px; }
+.report-chart-card{
+  background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow-lg);
+  padding:18px;margin-bottom:18px;
+}
+.report-chart-card h4{ margin:0 0 12px;font-size:.92rem; }
+.report-chart-card svg{ width:100%;height:auto;display:block; }
+.report-chart-card svg text{ font-family:'Vazirmatn',Tahoma,sans-serif; }
+.report-legend{ display:flex;flex-wrap:wrap;gap:10px 16px;margin-top:12px;justify-content:center; }
+.report-legend-item{ display:flex;align-items:center;gap:6px;font-size:.78rem;color:var(--text-mute); }
+.report-legend-swatch{ width:11px;height:11px;border-radius:3px;flex:0 0 auto; }
+
 </style>
 </head>
 <body>
@@ -361,6 +454,8 @@ footer.app-footer{
   <div class="view-tabs">
     <button type="button" class="view-tab is-active" id="tabAssessBtn">تکمیل ارزیابی</button>
     <button type="button" class="view-tab" id="tabMapBtn">نقشهٔ امتیازها</button>
+    <button type="button" class="view-tab" id="tabCompareBtn">مقایسه شهرها</button>
+    <button type="button" class="view-tab" id="tabReportBtn">گزارش نموداری</button>
   </div>
 
   <div id="assessmentView">
@@ -430,6 +525,47 @@ footer.app-footer{
       <p>نام واردشده برای این موارد در فهرست شهرستان‌های کشور پیدا نشد. استان درست را انتخاب کنید تا روی نقشه نمایش داده شود؛ این انتخاب فقط در همین مرورگر ذخیره می‌شود.</p>
       <div id="unmatchedList"></div>
     </div>
+
+  </div>
+
+  <div id="compareView" style="display:none">
+
+    <div class="compare-picker">
+      <div class="compare-picker-col">
+        <label>شهر اول</label>
+        <select id="compareSelectA"><option value="">— انتخاب ارزیابی —</option></select>
+      </div>
+      <div class="compare-vs">در برابر</div>
+      <div class="compare-picker-col">
+        <label>شهر دوم</label>
+        <select id="compareSelectB"><option value="">— انتخاب ارزیابی —</option></select>
+      </div>
+      <button class="btn btn-outline" id="compareRefreshBtn" type="button">🔄 به‌روزرسانی فهرست</button>
+    </div>
+
+    <div id="compareStatus">در حال بارگذاری ارزیابی‌های موجود…</div>
+
+    <div id="compareResults"></div>
+
+  </div>
+
+  <div id="reportView" style="display:none">
+
+    <div class="report-picker">
+      <div class="report-picker-head">
+        <h3>شهرهای موردنظر برای گزارش نموداری را انتخاب کنید</h3>
+        <div class="report-picker-actions">
+          <button class="btn btn-outline" id="reportSelectAllBtn" type="button">انتخاب همه</button>
+          <button class="btn btn-outline" id="reportClearBtn" type="button">پاک‌کردن انتخاب</button>
+          <button class="btn btn-outline" id="reportRefreshBtn" type="button">🔄 به‌روزرسانی فهرست</button>
+        </div>
+      </div>
+      <div id="reportCityList" class="report-city-list"></div>
+    </div>
+
+    <div id="reportStatus">در حال بارگذاری ارزیابی‌های موجود…</div>
+
+    <div id="reportChartArea"></div>
 
   </div>
 
@@ -1190,19 +1326,402 @@ async function refreshMap(){
 
 const tabAssessBtn = document.getElementById('tabAssessBtn');
 const tabMapBtn = document.getElementById('tabMapBtn');
+const tabCompareBtn = document.getElementById('tabCompareBtn');
+const tabReportBtn = document.getElementById('tabReportBtn');
 const assessmentView = document.getElementById('assessmentView');
 const mapView = document.getElementById('mapView');
+const compareView = document.getElementById('compareView');
+const reportView = document.getElementById('reportView');
+function activateTab(activeBtn, activeView){
+  [tabAssessBtn, tabMapBtn, tabCompareBtn, tabReportBtn].forEach(b => b.classList.remove('is-active'));
+  [assessmentView, mapView, compareView, reportView].forEach(v => v.style.display = 'none');
+  activeBtn.classList.add('is-active');
+  activeView.style.display = '';
+}
 tabAssessBtn.addEventListener('click', () => {
-  tabAssessBtn.classList.add('is-active');
-  tabMapBtn.classList.remove('is-active');
-  assessmentView.style.display = ''; mapView.style.display = 'none';
+  activateTab(tabAssessBtn, assessmentView);
 });
 tabMapBtn.addEventListener('click', () => {
-  tabMapBtn.classList.add('is-active');
-  tabAssessBtn.classList.remove('is-active');
-  mapView.style.display = ''; assessmentView.style.display = 'none';
+  activateTab(tabMapBtn, mapView);
   refreshMap();
 });
+tabCompareBtn.addEventListener('click', () => {
+  activateTab(tabCompareBtn, compareView);
+  loadCompareRecords();
+});
+tabReportBtn.addEventListener('click', () => {
+  activateTab(tabReportBtn, reportView);
+  loadReportRecords();
+});
+
+/* =========================================================
+   Compare cities (added feature)
+   ========================================================= */
+let compareRecordsCache = [];
+
+async function gatherCompareRecords(){
+  const records = [];
+  const seen = new Set();
+  const addRecord = (entry, source) => {
+    if (!entry || !entry.scores) return;
+    const city = (entry.city || '').trim() || 'بدون نام شهر';
+    const date = entry.date || '';
+    const total = Number(entry.total || 0);
+    const key = city + '||' + date + '||' + total;
+    if (seen.has(key)) return;
+    seen.add(key);
+    records.push({
+      city, date,
+      name: entry.name || '',
+      scores: entry.scores || {},
+      total,
+      maxScore: entry.maxScore || DATA.maxScore,
+      answered: entry.answered != null ? entry.answered : Object.keys(entry.scores || {}).length,
+      totalItems: entry.totalItems || DATA.totalItems,
+      status: entry.status || getBandForScore(total).label,
+      source
+    });
+  };
+  getSavedList().forEach(e => addRecord(e, 'local'));
+  if (cloudIsConfigured()){
+    try {
+      const { byCity } = await gatherAllRecords();
+      Object.keys(byCity).forEach(city => addRecord(byCity[city], 'cloud'));
+    } catch (e) {
+      console.warn('Could not load cloud results for compare:', e);
+    }
+  }
+  records.sort((a, b) => (b.date || '').localeCompare(a.date || '') || b.total - a.total);
+  return records;
+}
+
+function compareOptionLabel(r){
+  return `${r.city} — ${r.date || '—'} (${pd(r.total)}/${pd(r.maxScore)})`;
+}
+
+async function loadCompareRecords(){
+  const statusEl = document.getElementById('compareStatus');
+  const selA = document.getElementById('compareSelectA');
+  const selB = document.getElementById('compareSelectB');
+  const prevA = selA.value, prevB = selB.value;
+  statusEl.className = '';
+  statusEl.textContent = 'در حال بارگذاری ارزیابی‌های موجود…';
+  try {
+    compareRecordsCache = await gatherCompareRecords();
+  } catch (e){
+    compareRecordsCache = [];
+  }
+  const options = ['<option value="">— انتخاب ارزیابی —</option>']
+    .concat(compareRecordsCache.map((r, i) => `<option value="${i}">${compareOptionLabel(r)}</option>`))
+    .join('');
+  selA.innerHTML = options;
+  selB.innerHTML = options;
+  if (prevA) selA.value = prevA;
+  if (prevB) selB.value = prevB;
+  if (compareRecordsCache.length === 0){
+    statusEl.className = 'err';
+    statusEl.textContent = 'هیچ ارزیابی ذخیره‌شده‌ای (محلی یا ابری) برای مقایسه پیدا نشد. ابتدا حداقل دو ارزیابی را ذخیره کنید.';
+  } else {
+    statusEl.textContent = pd(compareRecordsCache.length) + ' ارزیابی برای مقایسه در دسترس است.';
+  }
+  renderCompare();
+}
+
+function domainScoreFor(scoresObj, dm){
+  let total = 0, answered = 0;
+  dm.items.forEach(it => {
+    const v = scoresObj[it.num];
+    if (v !== undefined && v !== null){ total += v; answered++; }
+  });
+  return { total, max: dm.items.length * 2, answered };
+}
+
+function renderCompare(){
+  const results = document.getElementById('compareResults');
+  const selA = document.getElementById('compareSelectA');
+  const selB = document.getElementById('compareSelectB');
+  const a = compareRecordsCache[selA.value];
+  const b = compareRecordsCache[selB.value];
+
+  if (!a || !b){
+    results.innerHTML = '<div class="compare-empty">برای مشاهدهٔ مقایسه، دو ارزیابی را از فهرست بالا انتخاب کنید.</div>';
+    return;
+  }
+
+  const bandA = getBandForScore(a.total), bandB = getBandForScore(b.total);
+  const clsA = bandColorClass(bandA.label), clsB = bandColorClass(bandB.label);
+
+  let winnerHtml;
+  if (a.total !== b.total){
+    const winner = a.total > b.total ? a : b;
+    winnerHtml = `<div class="compare-winner">🏆 ${winner.city} با اختلاف ${pd(Math.abs(a.total - b.total))} امتیاز، وضعیت بهتری دارد</div>`;
+  } else {
+    winnerHtml = `<div class="compare-winner">امتیاز کلی دو شهر برابر است</div>`;
+  }
+
+  const summaryHtml = `
+    <div class="compare-summary">
+      <div class="compare-summary-card">
+        <h3>${a.city}</h3>
+        <div class="csc-meta">${a.name ? a.name + ' — ' : ''}${a.date || '—'}</div>
+        <div class="csc-score">${pd(a.total)}</div>
+        <div class="csc-max">از ${pd(a.maxScore)}</div>
+        <div class="csc-band" style="background:var(--${clsA}-bg);color:var(--${clsA});">${bandA.label}</div>
+        <div class="csc-answered">${pd(a.answered)} از ${pd(a.totalItems)} شاخص پاسخ داده شده</div>
+      </div>
+      <div class="compare-summary-card">
+        <h3>${b.city}</h3>
+        <div class="csc-meta">${b.name ? b.name + ' — ' : ''}${b.date || '—'}</div>
+        <div class="csc-score">${pd(b.total)}</div>
+        <div class="csc-max">از ${pd(b.maxScore)}</div>
+        <div class="csc-band" style="background:var(--${clsB}-bg);color:var(--${clsB});">${bandB.label}</div>
+        <div class="csc-answered">${pd(b.answered)} از ${pd(b.totalItems)} شاخص پاسخ داده شده</div>
+      </div>
+    </div>
+    ${winnerHtml}
+  `;
+
+  const domainsHtml = DATA.domains.map(dm => {
+    const da = domainScoreFor(a.scores, dm);
+    const db = domainScoreFor(b.scores, dm);
+    const pctA = da.max ? (da.total / da.max * 100) : 0;
+    const pctB = db.max ? (db.total / db.max * 100) : 0;
+    return `
+      <div class="compare-domain-row">
+        <div class="compare-domain-title"><span>${dm.icon}</span><span>${dm.title}</span></div>
+        <div class="compare-domain-bars">
+          <div class="cdb-line">
+            <span class="cdb-label">${a.city}</span>
+            <div class="cdb-track"><div class="cdb-fill a" style="width:${pctA}%;"></div></div>
+            <span class="cdb-val">${pd(da.total)} / ${pd(da.max)}</span>
+          </div>
+          <div class="cdb-line">
+            <span class="cdb-label">${b.city}</span>
+            <div class="cdb-track"><div class="cdb-fill b" style="width:${pctB}%;"></div></div>
+            <span class="cdb-val">${pd(db.total)} / ${pd(db.max)}</span>
+          </div>
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  results.innerHTML = summaryHtml + domainsHtml;
+}
+
+document.getElementById('compareSelectA').addEventListener('change', renderCompare);
+document.getElementById('compareSelectB').addEventListener('change', renderCompare);
+document.getElementById('compareRefreshBtn').addEventListener('click', loadCompareRecords);
+
+/* =========================================================
+   Comparison report (chart) — added feature
+   ========================================================= */
+const REPORT_PALETTE = [
+  '#0E7C61', '#C98A1B', '#3C78D8', '#8E63CE', '#E07798',
+  '#149E60', '#CC3A21', '#2DA2BB', '#B99AFF', '#994A64',
+  '#4A86E8', '#D5AE49'
+];
+
+let reportRecordsCache = [];
+
+function svgEscape(s){
+  return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+function reportPaletteColor(idx){
+  return REPORT_PALETTE[idx % REPORT_PALETTE.length];
+}
+
+async function loadReportRecords(){
+  const statusEl = document.getElementById('reportStatus');
+  const listEl = document.getElementById('reportCityList');
+  const prevChecked = new Set(
+    Array.from(listEl.querySelectorAll('input[type="checkbox"]:checked')).map(cb => cb.value)
+  );
+  statusEl.className = '';
+  statusEl.textContent = 'در حال بارگذاری ارزیابی‌های موجود…';
+  try {
+    reportRecordsCache = await gatherCompareRecords();
+  } catch (e){
+    reportRecordsCache = [];
+  }
+  reportRecordsCache.forEach((r, i) => { r._idx = i; });
+
+  if (reportRecordsCache.length === 0){
+    listEl.innerHTML = '<div class="report-empty-list">هیچ ارزیابی ذخیره‌شده‌ای (محلی یا ابری) پیدا نشد. ابتدا حداقل دو ارزیابی را ذخیره کنید.</div>';
+    statusEl.className = 'err';
+    statusEl.textContent = 'هیچ ارزیابی‌ای برای رسم نمودار موجود نیست.';
+    renderReportChart();
+    return;
+  }
+
+  listEl.innerHTML = reportRecordsCache.map((r, i) => `
+    <div class="report-city-item">
+      <span class="rci-swatch" style="background:${reportPaletteColor(i)};"></span>
+      <input type="checkbox" id="reportCity${i}" value="${i}">
+      <label for="reportCity${i}">${svgEscape(compareOptionLabel(r))}</label>
+    </div>
+  `).join('');
+
+  listEl.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+    if (prevChecked.has(cb.value)) cb.checked = true;
+    cb.addEventListener('change', renderReportChart);
+  });
+
+  // Default: if nothing was previously selected, pre-check the first two records.
+  if (prevChecked.size === 0){
+    listEl.querySelectorAll('input[type="checkbox"]').forEach((cb, i) => {
+      if (i < 2) cb.checked = true;
+    });
+  }
+
+  statusEl.textContent = pd(reportRecordsCache.length) + ' ارزیابی موجود است — یک یا چند مورد را برای رسم نمودار انتخاب کنید.';
+  renderReportChart();
+}
+
+function getSelectedReportRecords(){
+  const listEl = document.getElementById('reportCityList');
+  return Array.from(listEl.querySelectorAll('input[type="checkbox"]:checked'))
+    .map(cb => reportRecordsCache[Number(cb.value)])
+    .filter(Boolean);
+}
+
+function buildReportLegendHtml(records){
+  return `<div class="report-legend">${records.map(r =>
+    `<div class="report-legend-item"><span class="report-legend-swatch" style="background:${reportPaletteColor(r._idx)};"></span>${svgEscape(r.city)}</div>`
+  ).join('')}</div>`;
+}
+
+function buildScoreChartSVG(records){
+  const w = Math.max(560, records.length * 100 + 90);
+  const h = 340;
+  const padL = 46, padR = 20, padT = 24, padB = 78;
+  const plotW = w - padL - padR;
+  const plotH = h - padT - padB;
+  const maxScore = DATA.maxScore;
+
+  const bandBg = { 'قرمز (ضعیف)': '#FBEAE8', 'نارنجی (کمتر از حد انتظار)': '#FDF2DE', 'زرد (نسبتاً قابل قبول)': '#FBF6DE', 'سبز (مطلوب)': '#E8F6ED' };
+  let bandRects = '';
+  DATA.bands.forEach(b => {
+    const parts = b.range.split('-').map(Number);
+    const lo = parts[0], hi = parts[1];
+    const yTop = padT + plotH - (hi / maxScore * plotH);
+    const rectH = (hi - lo) / maxScore * plotH;
+    bandRects += `<rect x="${padL}" y="${yTop}" width="${plotW}" height="${rectH}" fill="${bandBg[b.label] || '#f2f2f2'}"></rect>`;
+  });
+
+  let gridLines = '';
+  [0, 40, 80, 120, 160].forEach(v => {
+    const y = padT + plotH - (v / maxScore * plotH);
+    gridLines += `<line x1="${padL}" y1="${y}" x2="${padL + plotW}" y2="${y}" stroke="#D8D2C2" stroke-width="1"></line>`;
+    gridLines += `<text x="${padL - 8}" y="${y + 4}" font-size="11" fill="#5B6D66" text-anchor="end">${pd(v)}</text>`;
+  });
+
+  const gap = plotW / records.length;
+  const barWidth = Math.min(56, gap * 0.55);
+  let bars = '';
+  records.forEach((r, i) => {
+    const x = padL + i * gap + (gap - barWidth) / 2;
+    const barH = Math.max(2, (r.total / maxScore) * plotH);
+    const y = padT + plotH - barH;
+    const color = reportPaletteColor(r._idx);
+    const cityLabel = r.city.length > 12 ? r.city.slice(0, 11) + '…' : r.city;
+    bars += `
+      <rect x="${x}" y="${y}" width="${barWidth}" height="${barH}" rx="6" fill="${color}"></rect>
+      <text x="${x + barWidth / 2}" y="${y - 8}" font-size="12" font-weight="700" fill="#20302B" text-anchor="middle">${pd(r.total)}</text>
+      <text x="${x + barWidth / 2}" y="${padT + plotH + 20}" font-size="11" fill="#20302B" text-anchor="middle">${svgEscape(cityLabel)}</text>
+      <text x="${x + barWidth / 2}" y="${padT + plotH + 36}" font-size="10" fill="#5B6D66" text-anchor="middle">${svgEscape(r.date || '—')}</text>
+    `;
+  });
+
+  return `<svg viewBox="0 0 ${w} ${h}" xmlns="http://www.w3.org/2000/svg">
+    ${bandRects}
+    ${gridLines}
+    <line x1="${padL}" y1="${padT}" x2="${padL}" y2="${padT + plotH}" stroke="#5B6D66" stroke-width="1"></line>
+    <line x1="${padL}" y1="${padT + plotH}" x2="${padL + plotW}" y2="${padT + plotH}" stroke="#5B6D66" stroke-width="1"></line>
+    ${bars}
+  </svg>`;
+}
+
+function buildDomainChartSVG(records){
+  const domains = DATA.domains;
+  const w = Math.max(760, domains.length * Math.max(64, records.length * 16 + 16) + 60);
+  const h = 380;
+  const padL = 42, padR = 20, padT = 20, padB = 110;
+  const plotW = w - padL - padR;
+  const plotH = h - padT - padB;
+  const clusterW = plotW / domains.length;
+  const barWidth = Math.min(20, (clusterW - 10) / Math.max(1, records.length));
+
+  let gridLines = '';
+  [0, 25, 50, 75, 100].forEach(pct => {
+    const y = padT + plotH - (pct / 100 * plotH);
+    gridLines += `<line x1="${padL}" y1="${y}" x2="${padL + plotW}" y2="${y}" stroke="#E4E0D6" stroke-width="1"></line>`;
+    gridLines += `<text x="${padL - 8}" y="${y + 4}" font-size="10" fill="#5B6D66" text-anchor="end">${pd(pct)}٪</text>`;
+  });
+
+  let clusters = '';
+  domains.forEach((dm, di) => {
+    const x0 = padL + di * clusterW;
+    const groupWidth = barWidth * records.length;
+    const groupStart = x0 + (clusterW - groupWidth) / 2;
+    records.forEach((r, ri) => {
+      const da = domainScoreFor(r.scores, dm);
+      const pct = da.max ? (da.total / da.max * 100) : 0;
+      const barH = Math.max(1, pct / 100 * plotH);
+      const x = groupStart + ri * barWidth;
+      const y = padT + plotH - barH;
+      const color = reportPaletteColor(r._idx);
+      clusters += `<rect x="${x}" y="${y}" width="${Math.max(1, barWidth - 1)}" height="${barH}" fill="${color}"><title>${svgEscape(r.city)} — ${svgEscape(dm.title)}: ${pd(da.total)}/${pd(da.max)}</title></rect>`;
+    });
+    const labelX = x0 + clusterW / 2;
+    clusters += `
+      <text x="${labelX}" y="${padT + plotH + 18}" font-size="16" text-anchor="middle">${dm.icon}<title>${svgEscape(dm.title)}</title></text>
+      <text x="${labelX}" y="${padT + plotH + 36}" font-size="10" fill="#5B6D66" text-anchor="middle">حوزه ${pd(di + 1)}<title>${svgEscape(dm.title)}</title></text>
+    `;
+  });
+
+  return `<svg viewBox="0 0 ${w} ${h}" xmlns="http://www.w3.org/2000/svg">
+    ${gridLines}
+    <line x1="${padL}" y1="${padT}" x2="${padL}" y2="${padT + plotH}" stroke="#5B6D66" stroke-width="1"></line>
+    <line x1="${padL}" y1="${padT + plotH}" x2="${padL + plotW}" y2="${padT + plotH}" stroke="#5B6D66" stroke-width="1"></line>
+    ${clusters}
+  </svg>`;
+}
+
+function renderReportChart(){
+  const area = document.getElementById('reportChartArea');
+  const records = getSelectedReportRecords();
+
+  if (records.length === 0){
+    area.innerHTML = '<div class="compare-empty">برای رسم نمودار، حداقل یک ارزیابی را از فهرست بالا انتخاب کنید (برای مقایسه، دو مورد یا بیشتر).</div>';
+    return;
+  }
+
+  const legendHtml = buildReportLegendHtml(records);
+
+  area.innerHTML = `
+    <div class="report-chart-card">
+      <h4>مقایسهٔ امتیاز کل شهرها</h4>
+      ${buildScoreChartSVG(records)}
+      ${legendHtml}
+    </div>
+    <div class="report-chart-card">
+      <h4>مقایسهٔ درصد پیشرفت به تفکیک حوزه (نشانگر ماوس روی هر ستون، نام حوزه را نشان می‌دهد)</h4>
+      ${buildDomainChartSVG(records)}
+      ${legendHtml}
+    </div>
+  `;
+}
+
+document.getElementById('reportSelectAllBtn').addEventListener('click', () => {
+  document.querySelectorAll('#reportCityList input[type="checkbox"]').forEach(cb => { cb.checked = true; });
+  renderReportChart();
+});
+document.getElementById('reportClearBtn').addEventListener('click', () => {
+  document.querySelectorAll('#reportCityList input[type="checkbox"]').forEach(cb => { cb.checked = false; });
+  renderReportChart();
+});
+document.getElementById('reportRefreshBtn').addEventListener('click', loadReportRecords);
 
 </script>
 
