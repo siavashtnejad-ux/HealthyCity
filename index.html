@@ -482,13 +482,21 @@ footer.app-footer{
       <label for="loginNationalId">شماره ملی</label>
       <input type="text" id="loginNationalId" placeholder="۱۰ رقم" inputmode="numeric" maxlength="10" dir="ltr">
     </div>
+    <div class="login-field" id="loginRoleField" style="display:none">
+      <label for="loginRole">سطح دسترسی</label>
+      <select id="loginRole">
+        <option value="ارزیاب">ارزیاب (سطح ۱)</option>
+        <option value="کارشناس یک">کارشناس یک (سطح ۲)</option>
+        <option value="کارشناس دو">کارشناس دو (سطح ۳)</option>
+      </select>
+    </div>
     <div class="login-field" id="loginPasswordField">
       <label for="loginPassword">رمز عبور</label>
       <input type="password" id="loginPassword" placeholder="حداقل ۶ کاراکتر" dir="ltr">
     </div>
 
     <p class="login-note" id="loginSignupNote" style="display:none">
-      حساب‌های جدید همیشه با سطح دسترسی «ارزیاب» ساخته می‌شوند. ارتقا به «کارشناس یک» یا «کارشناس دو» فقط توسط مدیر سامانه انجام می‌شود.
+      سطح دسترسی خود را از فهرست بالا انتخاب کنید.
     </p>
 
     <div class="login-error" id="loginError" style="display:none"></div>
@@ -1825,7 +1833,7 @@ document.getElementById('reportRefreshBtn').addEventListener('click', loadReport
    ========================================================= */
 const SUPABASE_URL = 'https://ulhlmzvgiaofrclfvoox.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_Tw8e07GmeCKW79HgMPLKSw_ydgLdC99';
-const PROFILE_TABLE = 'healthy_city_profiles';
+const PROFILE_TABLE = 'hc_profiles';
 const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 const ROLE_LEVELS = { 'ارزیاب': 1, 'کارشناس یک': 2, 'کارشناس دو': 3 };
@@ -1889,6 +1897,7 @@ function renderLoginStage(stage){
   const nameField = document.getElementById('loginNameField');
   const emailField = document.getElementById('loginEmailField');
   const nationalIdField = document.getElementById('loginNationalIdField');
+  const roleField = document.getElementById('loginRoleField');
   const passwordField = document.getElementById('loginPasswordField');
   const note = document.getElementById('loginSignupNote');
   const hint = document.getElementById('loginModeHint');
@@ -1902,6 +1911,7 @@ function renderLoginStage(stage){
     nameField.style.display = 'none';
     emailField.style.display = '';
     nationalIdField.style.display = 'none';
+    roleField.style.display = 'none';
     passwordField.style.display = '';
     note.style.display = 'none';
     hint.textContent = 'برای استفاده از سامانه، وارد حساب کاربری خود شوید.';
@@ -1912,6 +1922,7 @@ function renderLoginStage(stage){
     nameField.style.display = '';
     emailField.style.display = '';
     nationalIdField.style.display = '';
+    roleField.style.display = '';
     passwordField.style.display = '';
     note.style.display = '';
     hint.textContent = 'برای ساخت حساب کاربری جدید، مشخصات خود را وارد کنید.';
@@ -1921,6 +1932,7 @@ function renderLoginStage(stage){
     nameField.style.display = '';
     emailField.style.display = 'none';
     nationalIdField.style.display = '';
+    roleField.style.display = 'none';
     passwordField.style.display = 'none';
     note.style.display = '';
     hint.textContent = 'ورود شما تأیید شد. برای تکمیل حساب، این اطلاعات را وارد کنید.';
@@ -1938,9 +1950,12 @@ async function fetchProfile(userId){
 }
 
 async function insertProfile(userId, name, nationalId){
-  // role is intentionally omitted — the database defaults (and enforces via RLS) 'ارزیاب'.
+  // The hc_handle_new_user trigger already created this row at signup time (role='ارزیاب').
+  // The client only ever fills in name/national_id here — it has no INSERT policy on this
+  // table on purpose, so it cannot create arbitrary profile rows or set its own role.
   const { data, error } = await sb.from(PROFILE_TABLE)
-    .insert({ id: userId, name, national_id: nationalId })
+    .update({ name, national_id: nationalId })
+    .eq('id', userId)
     .select('id,name,national_id,role')
     .single();
   return { data, error };
@@ -1981,13 +1996,14 @@ async function submitLogin(){
       const name = document.getElementById('loginName').value.trim();
       const email = document.getElementById('loginEmail').value.trim();
       const nationalId = document.getElementById('loginNationalId').value.trim();
+      const role = document.getElementById('loginRole').value;
       const password = document.getElementById('loginPassword').value;
       if (!name){ showLoginError('لطفاً نام و نام خانوادگی را وارد کنید.'); return; }
       if (!isValidEmail(email)){ showLoginError('ایمیل واردشده معتبر نیست.'); return; }
       if (!isValidNationalId(nationalId)){ showLoginError('شماره ملی واردشده معتبر نیست (باید ۱۰ رقم و صحیح باشد).'); return; }
       if (!password || password.length < 6){ showLoginError('رمز عبور باید حداقل ۶ کاراکتر باشد.'); return; }
 
-      const { data, error } = await sb.auth.signUp({ email, password });
+      const { data, error } = await sb.auth.signUp({ email, password, options: { data: { role } } });
       if (error){ showLoginError('ثبت‌نام ناموفق بود: ' + (error.message || '')); return; }
 
       if (data.session){
