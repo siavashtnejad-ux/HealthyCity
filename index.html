@@ -553,6 +553,9 @@ footer.app-footer{
         <button class="btn" id="loadBtn">📂 بازکردن ارزیابی</button>
         <button class="btn btn-outline" id="printBtn">🖨️ چاپ</button>
         <button class="btn btn-outline" id="resetBtn">♻️ شروع مجدد</button>
+        <button class="btn btn-outline" id="uploadPlanBtn" data-min-level="2" style="display:none">📎 آپلود فایل برنامه‌های عملیاتی</button>
+        <button class="btn btn-outline" id="viewPlansBtn" data-min-level="2" style="display:none">📂 فایل‌های آپلودشده</button>
+        <input type="file" id="uploadPlanFileInput" accept="application/pdf" style="display:none">
       </div>
     </div>
     <div class="date-row">
@@ -707,6 +710,15 @@ footer.app-footer{
     <h3>✅ درخواست‌های دسترسی در انتظار تأیید</h3>
     <div id="approvalsList" class="modal-list"></div>
     <button class="modal-close" id="approvalsModalCloseBtn">بستن</button>
+  </div>
+</div>
+
+<div class="overlay" id="plansModalOverlay">
+  <div class="modal">
+    <h3>📂 فایل‌های برنامه‌های عملیاتی</h3>
+    <button class="btn btn-outline" id="plansBackBtn" type="button" style="display:none;margin-bottom:10px;">→ بازگشت به فهرست شهرها</button>
+    <div id="plansList" class="modal-list"></div>
+    <button class="modal-close" id="plansModalCloseBtn">بستن</button>
   </div>
 </div>
 
@@ -1911,11 +1923,14 @@ function updateUserInfoUI(profile, email){
   document.getElementById('userRoleBadge').textContent = `${profile.role} (سطح ${pd(roleLevel(profile.role))})`;
 }
 
+let currentAccessLevel = 0;
+
 function applyAccessControl(profile){
   const level = profile ? roleLevel(profile.role) : 0;
-  document.querySelectorAll('.view-tab').forEach(btn => {
-    const min = parseInt(btn.dataset.minLevel || '1', 10);
-    btn.style.display = (level >= min) ? '' : 'none';
+  currentAccessLevel = level;
+  document.querySelectorAll('[data-min-level]').forEach(el => {
+    const min = parseInt(el.dataset.minLevel || '1', 10);
+    el.style.display = (level >= min) ? '' : 'none';
   });
   document.getElementById('adminApprovalsBtn').style.display = (profile && profile.is_admin) ? '' : 'none';
   const activeBtn = document.querySelector('.view-tab.is-active');
@@ -2227,6 +2242,174 @@ document.getElementById('approvalsModalCloseBtn').addEventListener('click', clos
 document.getElementById('approvalsModalOverlay').addEventListener('click', e => {
   if (e.target.id === 'approvalsModalOverlay') closeApprovalsModal();
 });
+
+/* ---------------- Upload operational plans file (level 2+) ---------------- */
+document.getElementById('uploadPlanBtn').addEventListener('click', () => {
+  // The button is already hidden below level 2 via applyAccessControl/data-min-level, but this
+  // check guards against the button being clicked in any state where that hasn't run yet.
+  if (currentAccessLevel < 2){
+    showToast('این قابلیت فقط برای کارشناس یک و کارشناس دو در دسترس است');
+    return;
+  }
+  document.getElementById('uploadPlanFileInput').click();
+});
+
+document.getElementById('uploadPlanFileInput').addEventListener('change', async e => {
+  const file = e.target.files && e.target.files[0];
+  e.target.value = ''; // allow re-selecting the same file next time
+  if (!file) return;
+  if (file.type !== 'application/pdf'){
+    showToast('لطفاً فقط فایل PDF انتخاب کنید');
+    return;
+  }
+  if (currentAccessLevel < 2){
+    // Storage RLS enforces this server-side regardless — this is just a faster failure client-side.
+    showToast('این قابلیت فقط برای کارشناس یک و کارشناس دو در دسترس است');
+    return;
+  }
+
+  const btn = document.getElementById('uploadPlanBtn');
+  const originalLabel = btn.textContent;
+  btn.disabled = true;
+  btn.textContent = '⏳ در حال آپلود…';
+
+  try {
+    const cityRaw = document.getElementById('cityName').value.trim() || 'بدون-نام-شهر';
+    const safeCity = cityRaw.replace(/[\/\\?%*:|"<>]/g, '-').slice(0, 60);
+    const safeFileName = file.name.replace(/[\/\\?%*:|"<>]/g, '-');
+    const path = `${safeCity}/${Date.now()}-${safeFileName}`;
+
+    const { error } = await sb.storage.from('operational-plans').upload(path, file, {
+      contentType: 'application/pdf',
+      upsert: false
+    });
+
+    if (error){
+      showToast('آپلود ناموفق بود: ' + (error.message || ''));
+      return;
+    }
+    showToast(`فایل «${file.name}» با موفقیت بارگذاری شد`);
+  } catch (err){
+    showToast('خطای غیرمنتظره‌ای هنگام آپلود رخ داد');
+    console.error(err);
+  } finally {
+    btn.disabled = false;
+    btn.textContent = originalLabel;
+  }
+});
+
+/* ---------------- Browse / download uploaded plan files (level 2+) ---------------- */
+async function loadPlansCityFolders(){
+  const wrap = document.getElementById('plansList');
+  document.getElementById('plansBackBtn').style.display = 'none';
+  wrap.innerHTML = '<div class="modal-empty">در حال بارگذاری…</div>';
+  const { data, error } = await sb.storage.from('operational-plans')
+    .list('', { limit: 200, sortBy: { column: 'name', order: 'asc' } });
+  if (error){
+    wrap.innerHTML = '<div class="modal-empty">خطا در بارگذاری فهرست: ' + (error.message || '') + '</div>';
+    return;
+  }
+  // Supabase Storage represents a common prefix ("folder") as an entry with id === null.
+  const folders = (data || []).filter(item => item.id === null);
+  if (folders.length === 0){
+    wrap.innerHTML = '<div class="modal-empty">هنوز هیچ فایلی بارگذاری نشده است.</div>';
+    return;
+  }
+  wrap.innerHTML = '';
+  folders.forEach(f => {
+    const row = document.createElement('div');
+    row.className = 'modal-item';
+    row.innerHTML = `<div><b>🏙️ ${f.name}</b></div><span class="load-btn">مشاهده فایل‌ها</span>`;
+    row.querySelector('.load-btn').onclick = () => openPlansCityFolder(f.name);
+    wrap.appendChild(row);
+  });
+}
+
+async function openPlansCityFolder(cityName){
+  const wrap = document.getElementById('plansList');
+  document.getElementById('plansBackBtn').style.display = '';
+  wrap.innerHTML = '<div class="modal-empty">در حال بارگذاری…</div>';
+  const { data, error } = await sb.storage.from('operational-plans')
+    .list(cityName, { limit: 200, sortBy: { column: 'created_at', order: 'desc' } });
+  if (error){
+    wrap.innerHTML = '<div class="modal-empty">خطا در بارگذاری فایل‌ها: ' + (error.message || '') + '</div>';
+    return;
+  }
+  const files = (data || []).filter(item => item.id !== null);
+  if (files.length === 0){
+    wrap.innerHTML = '<div class="modal-empty">فایلی برای این شهر یافت نشد.</div>';
+    return;
+  }
+  wrap.innerHTML = '';
+  files.forEach(file => {
+    const fullPath = cityName + '/' + file.name;
+    const sizeKb = file.metadata && file.metadata.size ? Math.round(file.metadata.size / 1024) + ' کیلوبایت' : '';
+    const uploadedAt = file.created_at ? new Date(file.created_at).toLocaleDateString('fa-IR') : '';
+    const row = document.createElement('div');
+    row.className = 'modal-item';
+    row.innerHTML = `
+      <div>
+        <div><b>${file.name}</b></div>
+        <div style="color:var(--text-mute);font-size:.78rem;">${uploadedAt}${sizeKb ? ' — ' + sizeKb : ''}</div>
+      </div>
+      <div style="display:flex;gap:10px;align-items:center;">
+        <span class="load-btn">دانلود</span>
+        ${currentAccessLevel >= 3 ? '<button title="حذف">🗑</button>' : ''}
+      </div>
+    `;
+    row.querySelector('.load-btn').onclick = () => downloadPlanFile(fullPath, file.name);
+    const delBtn = row.querySelector('button');
+    if (delBtn){
+      delBtn.onclick = () => deletePlanFile(fullPath, cityName);
+    }
+    wrap.appendChild(row);
+  });
+}
+
+async function downloadPlanFile(fullPath, displayName){
+  // Bucket is private, so a temporary signed URL is required — createSignedUrl itself is still
+  // subject to the operational_plans_select_level2 storage policy on the server side.
+  const { data, error } = await sb.storage.from('operational-plans').createSignedUrl(fullPath, 60);
+  if (error || !data){
+    showToast('دریافت لینک دانلود ناموفق بود: ' + (error && error.message ? error.message : ''));
+    return;
+  }
+  const a = document.createElement('a');
+  a.href = data.signedUrl;
+  a.download = displayName;
+  a.target = '_blank';
+  a.rel = 'noopener';
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+}
+
+async function deletePlanFile(fullPath, cityName){
+  if (!confirm('این فایل حذف شود؟')) return;
+  const { error } = await sb.storage.from('operational-plans').remove([fullPath]);
+  if (error){
+    showToast('حذف ناموفق بود: ' + (error.message || ''));
+    return;
+  }
+  showToast('فایل حذف شد');
+  openPlansCityFolder(cityName);
+}
+
+document.getElementById('viewPlansBtn').addEventListener('click', () => {
+  if (currentAccessLevel < 2){
+    showToast('این قابلیت فقط برای کارشناس یک و کارشناس دو در دسترس است');
+    return;
+  }
+  document.getElementById('plansModalOverlay').classList.add('show');
+  loadPlansCityFolders();
+});
+document.getElementById('plansModalCloseBtn').addEventListener('click', () => {
+  document.getElementById('plansModalOverlay').classList.remove('show');
+});
+document.getElementById('plansModalOverlay').addEventListener('click', e => {
+  if (e.target.id === 'plansModalOverlay') document.getElementById('plansModalOverlay').classList.remove('show');
+});
+document.getElementById('plansBackBtn').addEventListener('click', loadPlansCityFolders);
 
 </script>
 
