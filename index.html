@@ -512,6 +512,17 @@ footer.app-footer{
       <label for="loginPassword">رمز عبور</label>
       <input type="password" id="loginPassword" placeholder="حداقل ۶ کاراکتر" dir="ltr">
     </div>
+    <div class="login-field" id="loginForgotLinkWrap" style="text-align:left;margin:-6px 0 10px;">
+      <a href="#" id="loginForgotLink" style="font-size:.72rem;color:var(--primary);text-decoration:none;">رمز عبور را فراموش کرده‌اید؟</a>
+    </div>
+    <div class="login-field" id="loginNewPasswordField" style="display:none">
+      <label for="loginNewPassword">رمز عبور جدید</label>
+      <input type="password" id="loginNewPassword" placeholder="حداقل ۶ کاراکتر" dir="ltr">
+    </div>
+    <div class="login-field" id="loginConfirmPasswordField" style="display:none">
+      <label for="loginConfirmPassword">تکرار رمز عبور جدید</label>
+      <input type="password" id="loginConfirmPassword" dir="ltr">
+    </div>
 
     <p class="login-note" id="loginSignupNote" style="display:none">
       سطح دسترسی خود را از فهرست بالا انتخاب کنید.
@@ -519,6 +530,9 @@ footer.app-footer{
 
     <div class="login-error" id="loginError" style="display:none"></div>
     <button class="btn btn-solid login-submit" id="loginSubmitBtn" type="button">ورود</button>
+    <div class="login-field" id="loginBackToSigninWrap" style="display:none;text-align:center;margin-top:8px;">
+      <a href="#" id="loginBackToSigninLink" style="font-size:.76rem;color:var(--text-mute);text-decoration:none;">بازگشت به ورود</a>
+    </div>
 
     <div class="login-status-block" id="loginStatusBlock" style="display:none">
       <div class="login-status-icon" id="loginStatusIcon">⏳</div>
@@ -555,6 +569,7 @@ footer.app-footer{
         <button class="btn btn-outline" id="resetBtn">♻️ شروع مجدد</button>
         <button class="btn btn-outline" id="uploadPlanBtn" data-min-level="2" style="display:none">📎 آپلود فایل برنامه‌های عملیاتی</button>
         <button class="btn btn-outline" id="viewPlansBtn" data-min-level="2" style="display:none">📂 فایل‌های آپلودشده</button>
+        <button class="btn btn-outline" id="exportCsvBtn" data-min-level="2" style="display:none">⬇️ خروجی CSV</button>
         <input type="file" id="uploadPlanFileInput" accept="application/pdf" style="display:none">
       </div>
     </div>
@@ -570,6 +585,7 @@ footer.app-footer{
       <span id="userInfoText"></span>
       <span class="role-badge" id="userRoleBadge"></span>
       <button class="btn btn-outline" id="adminApprovalsBtn" type="button" style="display:none">✅ تأیید درخواست‌ها</button>
+      <button class="btn btn-outline" id="adminsPanelBtn" type="button" style="display:none">🛡️ پنل مدیران</button>
       <button class="btn btn-outline" id="logoutBtn" type="button">خروج</button>
     </div>
   </header>
@@ -710,6 +726,25 @@ footer.app-footer{
     <h3>✅ درخواست‌های دسترسی در انتظار تأیید</h3>
     <div id="approvalsList" class="modal-list"></div>
     <button class="modal-close" id="approvalsModalCloseBtn">بستن</button>
+  </div>
+</div>
+
+<div class="overlay" id="adminsModalOverlay">
+  <div class="modal">
+    <h3>🛡️ پنل مدیران</h3>
+    <p class="login-note" style="margin-bottom:14px;">مدیران سامانه به تأیید درخواست‌های دسترسی و مدیریت سایر مدیران دسترسی دارند.</p>
+
+    <div class="login-field">
+      <label for="grantAdminEmail">اعطای دسترسی مدیریت با ایمیل</label>
+      <input type="email" id="grantAdminEmail" placeholder="name@example.com" dir="ltr">
+    </div>
+    <div class="login-error" id="adminsPanelError" style="display:none"></div>
+    <button class="btn btn-solid login-submit" id="grantAdminBtn" type="button" style="margin-bottom:18px;">اعطای دسترسی مدیریت</button>
+
+    <h4 style="margin:0 0 8px;font-size:.85rem;color:var(--text);">مدیران فعلی</h4>
+    <div id="adminsList" class="modal-list"></div>
+
+    <button class="modal-close" id="adminsModalCloseBtn">بستن</button>
   </div>
 </div>
 
@@ -1813,6 +1848,13 @@ const SUPABASE_ANON_KEY = 'sb_publishable_Tw8e07GmeCKW79HgMPLKSw_ydgLdC99';
 const PROFILE_TABLE = 'hc_profiles';
 const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
+sb.auth.onAuthStateChange((event, session) => {
+  if (event === 'PASSWORD_RECOVERY'){
+    renderLoginStage('reset-password');
+    showLoginOverlay();
+  }
+});
+
 const ROLE_LEVELS = { 'ارزیاب': 1, 'کارشناس مسئول دانشگاه': 2, 'کارشناس سطح ملی': 3 };
 function roleLevel(role){ return ROLE_LEVELS[role] || 1; }
 
@@ -1865,6 +1907,7 @@ function applyAccessControl(profile){
     el.style.display = (level >= min) ? '' : 'none';
   });
   document.getElementById('adminApprovalsBtn').style.display = (profile && profile.is_admin) ? '' : 'none';
+  document.getElementById('adminsPanelBtn').style.display = (profile && profile.is_admin) ? '' : 'none';
   const activeBtn = document.querySelector('.view-tab.is-active');
   if (activeBtn && activeBtn.style.display === 'none'){
     activateTab(tabAssessBtn, assessmentView);
@@ -1881,21 +1924,35 @@ function renderLoginStage(stage){
   const nationalIdField = document.getElementById('loginNationalIdField');
   const roleField = document.getElementById('loginRoleField');
   const passwordField = document.getElementById('loginPasswordField');
+  const forgotLinkWrap = document.getElementById('loginForgotLinkWrap');
+  const newPasswordField = document.getElementById('loginNewPasswordField');
+  const confirmPasswordField = document.getElementById('loginConfirmPasswordField');
+  const backToSigninWrap = document.getElementById('loginBackToSigninWrap');
   const note = document.getElementById('loginSignupNote');
   const hint = document.getElementById('loginModeHint');
   const submitBtn = document.getElementById('loginSubmitBtn');
   const signinTab = document.getElementById('loginTabSignin');
   const signupTab = document.getElementById('loginTabSignup');
 
+  // Defaults; each branch below only overrides what differs.
+  tabs.style.display = 'none';
+  nameField.style.display = 'none';
+  emailField.style.display = 'none';
+  nationalIdField.style.display = 'none';
+  roleField.style.display = 'none';
+  passwordField.style.display = 'none';
+  forgotLinkWrap.style.display = 'none';
+  newPasswordField.style.display = 'none';
+  confirmPasswordField.style.display = 'none';
+  backToSigninWrap.style.display = 'none';
+  note.style.display = 'none';
+
   if (stage === 'signin'){
     tabs.style.display = '';
     signinTab.classList.add('is-active'); signupTab.classList.remove('is-active');
-    nameField.style.display = 'none';
     emailField.style.display = '';
-    nationalIdField.style.display = 'none';
-    roleField.style.display = 'none';
     passwordField.style.display = '';
-    note.style.display = 'none';
+    forgotLinkWrap.style.display = '';
     hint.textContent = 'برای استفاده از سامانه، وارد حساب کاربری خود شوید.';
     submitBtn.textContent = 'ورود';
   } else if (stage === 'signup'){
@@ -1910,15 +1967,21 @@ function renderLoginStage(stage){
     hint.textContent = 'برای ساخت حساب کاربری جدید، مشخصات خود را وارد کنید.';
     submitBtn.textContent = 'ثبت‌نام';
   } else if (stage === 'complete-profile'){
-    tabs.style.display = 'none';
     nameField.style.display = '';
-    emailField.style.display = 'none';
     nationalIdField.style.display = '';
-    roleField.style.display = 'none';
-    passwordField.style.display = 'none';
     note.style.display = '';
     hint.textContent = 'ورود شما تأیید شد. برای تکمیل حساب، این اطلاعات را وارد کنید.';
     submitBtn.textContent = 'تکمیل ثبت‌نام و ورود';
+  } else if (stage === 'forgot-password'){
+    emailField.style.display = '';
+    backToSigninWrap.style.display = '';
+    hint.textContent = 'ایمیل حساب خود را وارد کنید تا لینک بازیابی رمز عبور برای شما ارسال شود.';
+    submitBtn.textContent = 'ارسال لینک بازیابی';
+  } else if (stage === 'reset-password'){
+    newPasswordField.style.display = '';
+    confirmPasswordField.style.display = '';
+    hint.textContent = 'رمز عبور جدید خود را تنظیم کنید.';
+    submitBtn.textContent = 'تنظیم رمز عبور جدید';
   }
 }
 
@@ -2066,6 +2129,32 @@ async function submitLogin(){
       if (granted){
         showToast('ثبت‌نام تکمیل شد و وارد شدید');
       }
+
+    } else if (loginStage === 'forgot-password'){
+      const email = document.getElementById('loginEmail').value.trim();
+      if (!isValidEmail(email)){ showLoginError('ایمیل واردشده معتبر نیست.'); return; }
+      const { error } = await sb.auth.resetPasswordForEmail(email, {
+        redirectTo: window.location.origin + window.location.pathname
+      });
+      if (error){ showLoginError('ارسال ایمیل بازیابی ناموفق بود: ' + (error.message || '')); return; }
+      showToast('لینک بازیابی رمز عبور به ایمیل شما ارسال شد');
+      renderLoginStage('signin');
+      document.getElementById('loginEmail').value = email;
+
+    } else if (loginStage === 'reset-password'){
+      const pw1 = document.getElementById('loginNewPassword').value;
+      const pw2 = document.getElementById('loginConfirmPassword').value;
+      if (!pw1 || pw1.length < 6){ showLoginError('رمز عبور باید حداقل ۶ کاراکتر باشد.'); return; }
+      if (pw1 !== pw2){ showLoginError('رمز عبور و تکرار آن یکسان نیستند.'); return; }
+      const { error } = await sb.auth.updateUser({ password: pw1 });
+      if (error){ showLoginError('تغییر رمز عبور ناموفق بود: ' + (error.message || '')); return; }
+      showToast('رمز عبور با موفقیت تغییر کرد');
+      const { data: sessionData } = await sb.auth.getSession();
+      if (sessionData && sessionData.session){
+        await handleAuthenticatedSession(sessionData.session);
+      } else {
+        renderLoginStage('signin');
+      }
     }
   } catch (e){
     showLoginError('خطای غیرمنتظره‌ای رخ داد. دوباره تلاش کنید.');
@@ -2077,6 +2166,14 @@ async function submitLogin(){
 
 async function initAuth(){
   applyAccessControl(null);
+  const recoveryHint = (window.location.hash || '') + (window.location.search || '');
+  if (recoveryHint.includes('type=recovery')){
+    // Don't auto-grant access on a recovery link — the onAuthStateChange PASSWORD_RECOVERY
+    // handler (registered right after the client is created) switches to the "set a new
+    // password" form once Supabase finishes parsing the token from the URL.
+    showLoginOverlay();
+    return;
+  }
   const { data, error } = await sb.auth.getSession();
   if (error || !data.session){
     renderLoginStage('signin');
@@ -2085,6 +2182,15 @@ async function initAuth(){
   }
   await handleAuthenticatedSession(data.session);
 }
+
+document.getElementById('loginForgotLink').addEventListener('click', e => {
+  e.preventDefault();
+  renderLoginStage('forgot-password');
+});
+document.getElementById('loginBackToSigninLink').addEventListener('click', e => {
+  e.preventDefault();
+  renderLoginStage('signin');
+});
 
 document.getElementById('loginTabSignin').addEventListener('click', () => renderLoginStage('signin'));
 document.getElementById('loginTabSignup').addEventListener('click', () => renderLoginStage('signup'));
@@ -2342,6 +2448,167 @@ document.getElementById('plansModalOverlay').addEventListener('click', e => {
   if (e.target.id === 'plansModalOverlay') document.getElementById('plansModalOverlay').classList.remove('show');
 });
 document.getElementById('plansBackBtn').addEventListener('click', loadPlansCityFolders);
+
+/* ---------------- CSV export (level 2+) ---------------- */
+function csvEscape(value){
+  const s = (value === null || value === undefined) ? '' : String(value);
+  if (/[",\n]/.test(s)){
+    return '"' + s.replace(/"/g, '""') + '"';
+  }
+  return s;
+}
+
+async function exportAssessmentsCsv(){
+  if (currentAccessLevel < 2){
+    showToast('این قابلیت فقط برای کارشناس مسئول دانشگاه و کارشناس سطح ملی در دسترس است');
+    return;
+  }
+
+  const btn = document.getElementById('exportCsvBtn');
+  const originalLabel = btn.textContent;
+  btn.disabled = true;
+  btn.textContent = '⏳ در حال آماده‌سازی…';
+
+  try {
+    const { data, error } = await sb.from('hc_assessments')
+      .select('id, city, evaluator_name, assessment_date, scores, total, max_score, answered, total_items, status, saved_at')
+      .order('saved_at', { ascending: false })
+      .limit(2000);
+    if (error){
+      showToast('دریافت داده‌ها ناموفق بود: ' + (error.message || ''));
+      return;
+    }
+    if (!data || data.length === 0){
+      showToast('هیچ ارزیابی‌ای برای خروجی گرفتن وجود ندارد');
+      return;
+    }
+
+    const indicatorNums = [];
+    DATA.domains.forEach(dm => dm.items.forEach(it => indicatorNums.push(it.num)));
+
+    const headerCols = ['ردیف', 'نام شهر', 'ارزیاب', 'تاریخ ارزیابی', 'امتیاز کل', 'حداکثر امتیاز', 'تعداد پاسخ', 'وضعیت', 'تاریخ ذخیره']
+      .concat(indicatorNums.map(n => 'شاخص ' + n));
+    const lines = [headerCols.map(csvEscape).join(',')];
+
+    data.forEach((row, i) => {
+      const rowScores = row.scores || {};
+      const cols = [
+        i + 1, row.city, row.evaluator_name, row.assessment_date,
+        row.total, row.max_score, row.answered, row.status, row.saved_at
+      ].concat(indicatorNums.map(n => (rowScores[n] !== undefined && rowScores[n] !== null) ? rowScores[n] : ''));
+      lines.push(cols.map(csvEscape).join(','));
+    });
+
+    // Leading BOM so Excel (especially on Windows) renders the Persian text correctly.
+    const csvContent = '\uFEFF' + lines.join('\r\n');
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    const stamp = new Date().toISOString().slice(0, 10);
+    a.href = url;
+    a.download = `healthy-city-assessments-${stamp}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+    showToast(`فایل CSV شامل ${pd(data.length)} ارزیابی دانلود شد`);
+  } catch (err){
+    showToast('خطای غیرمنتظره‌ای در تهیهٔ خروجی رخ داد');
+    console.error(err);
+  } finally {
+    btn.disabled = false;
+    btn.textContent = originalLabel;
+  }
+}
+
+document.getElementById('exportCsvBtn').addEventListener('click', exportAssessmentsCsv);
+
+/* ---------------- پنل مدیران (admin management, is_admin only) ---------------- */
+async function loadAdminsList(){
+  const wrap = document.getElementById('adminsList');
+  wrap.innerHTML = '<div class="modal-empty">در حال بارگذاری…</div>';
+  const { data, error } = await sb.from(PROFILE_TABLE)
+    .select('id, email, name, role')
+    .eq('is_admin', true)
+    .order('email', { ascending: true });
+  if (error){
+    wrap.innerHTML = '<div class="modal-empty">خطا در بارگذاری فهرست: ' + (error.message || '') + '</div>';
+    return;
+  }
+  if (!data || data.length === 0){
+    wrap.innerHTML = '<div class="modal-empty">هیچ مدیری یافت نشد.</div>';
+    return;
+  }
+  wrap.innerHTML = '';
+  data.forEach(row => {
+    const item = document.createElement('div');
+    item.className = 'approval-item';
+    item.innerHTML = `
+      <div class="ai-meta">
+        <b>${row.name || '—'}</b> — ${row.role}<br>
+        ${row.email || ''}
+      </div>
+      <div class="ai-actions">
+        <button class="ai-reject">لغو دسترسی</button>
+      </div>
+    `;
+    item.querySelector('.ai-reject').onclick = () => revokeAdmin(row.email);
+    wrap.appendChild(item);
+  });
+}
+
+async function grantAdmin(){
+  const errEl = document.getElementById('adminsPanelError');
+  const btn = document.getElementById('grantAdminBtn');
+  const email = document.getElementById('grantAdminEmail').value.trim();
+  errEl.style.display = 'none';
+  if (!isValidEmail(email)){
+    errEl.textContent = 'ایمیل واردشده معتبر نیست.'; errEl.style.display = ''; return;
+  }
+  btn.disabled = true;
+  try {
+    // hc_set_admin_status itself re-checks server-side that the caller is already an admin —
+    // this panel being visible client-side is just UX, not the actual access control.
+    const { error } = await sb.rpc('hc_set_admin_status', { target_email: email, make_admin: true });
+    if (error){
+      errEl.textContent = 'خطا: ' + (error.message || 'عملیات ناموفق بود.');
+      errEl.style.display = '';
+      return;
+    }
+    showToast('دسترسی مدیریت اعطا شد');
+    document.getElementById('grantAdminEmail').value = '';
+    loadAdminsList();
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+async function revokeAdmin(email){
+  if (!confirm(`دسترسی مدیریت «${email}» لغو شود؟`)) return;
+  const { error } = await sb.rpc('hc_set_admin_status', { target_email: email, make_admin: false });
+  if (error){
+    showToast('خطا: ' + (error.message || 'عملیات ناموفق بود.'));
+    return;
+  }
+  showToast('دسترسی مدیریت لغو شد');
+  loadAdminsList();
+}
+
+function openAdminsModal(){
+  document.getElementById('adminsPanelError').style.display = 'none';
+  document.getElementById('grantAdminEmail').value = '';
+  document.getElementById('adminsModalOverlay').classList.add('show');
+  loadAdminsList();
+}
+function closeAdminsModal(){
+  document.getElementById('adminsModalOverlay').classList.remove('show');
+}
+document.getElementById('adminsPanelBtn').addEventListener('click', openAdminsModal);
+document.getElementById('adminsModalCloseBtn').addEventListener('click', closeAdminsModal);
+document.getElementById('adminsModalOverlay').addEventListener('click', e => {
+  if (e.target.id === 'adminsModalOverlay') closeAdminsModal();
+});
+document.getElementById('grantAdminBtn').addEventListener('click', grantAdmin);
 
 </script>
 
