@@ -504,8 +504,8 @@ footer.app-footer{
       <label for="loginRole">سطح دسترسی</label>
       <select id="loginRole">
         <option value="ارزیاب">ارزیاب (سطح ۱)</option>
-        <option value="کارشناس یک">کارشناس یک (سطح ۲)</option>
-        <option value="کارشناس دو">کارشناس دو (سطح ۳)</option>
+        <option value="کارشناس مسئول دانشگاه">کارشناس مسئول دانشگاه (سطح ۲)</option>
+        <option value="کارشناس سطح ملی">کارشناس سطح ملی (سطح ۳)</option>
       </select>
     </div>
     <div class="login-field" id="loginPasswordField">
@@ -1881,7 +1881,7 @@ const SUPABASE_ANON_KEY = 'sb_publishable_Tw8e07GmeCKW79HgMPLKSw_ydgLdC99';
 const PROFILE_TABLE = 'hc_profiles';
 const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-const ROLE_LEVELS = { 'ارزیاب': 1, 'کارشناس یک': 2, 'کارشناس دو': 3 };
+const ROLE_LEVELS = { 'ارزیاب': 1, 'کارشناس مسئول دانشگاه': 2, 'کارشناس سطح ملی': 3 };
 function roleLevel(role){ return ROLE_LEVELS[role] || 1; }
 
 let currentProfile = null;   // { id, name, national_id, role } — the authoritative, server-verified profile
@@ -2001,7 +2001,7 @@ async function fetchProfile(userId){
 
 async function insertProfile(userId, name, nationalId){
   // The hc_handle_new_user trigger already created this row at signup time (role decided by
-  // the caller, status auto-set to pending for کارشناس یک/دو). The client only ever fills in
+  // the caller, status auto-set to pending for کارشناس مسئول دانشگاه/کارشناس سطح ملی). The client only ever fills in
   // name/national_id here — it has no INSERT policy on this table on purpose, so it cannot
   // create arbitrary profile rows or set its own role/status/admin flag.
   const { data, error } = await sb.from(PROFILE_TABLE)
@@ -2044,7 +2044,7 @@ function hideAccountStatusBlock(){
 }
 
 /* Shared by sign-in, sign-up and the complete-profile fallback: only ever grants access to the
-   app when the account's status is 'active' — کارشناس یک/دو accounts sit behind this until an
+   app when the account's status is 'active' — کارشناس مسئول دانشگاه/کارشناس سطح ملی accounts sit behind this until an
    admin approves them, regardless of which path got them here. Returns true if access granted. */
 function finalizeProfileAccess(profile, email){
   if (profile.status === 'pending' || profile.status === 'rejected'){
@@ -2248,7 +2248,7 @@ document.getElementById('uploadPlanBtn').addEventListener('click', () => {
   // The button is already hidden below level 2 via applyAccessControl/data-min-level, but this
   // check guards against the button being clicked in any state where that hasn't run yet.
   if (currentAccessLevel < 2){
-    showToast('این قابلیت فقط برای کارشناس یک و کارشناس دو در دسترس است');
+    showToast('این قابلیت فقط برای کارشناس مسئول دانشگاه و کارشناس سطح ملی در دسترس است');
     return;
   }
   document.getElementById('uploadPlanFileInput').click();
@@ -2264,7 +2264,7 @@ document.getElementById('uploadPlanFileInput').addEventListener('change', async 
   }
   if (currentAccessLevel < 2){
     // Storage RLS enforces this server-side regardless — this is just a faster failure client-side.
-    showToast('این قابلیت فقط برای کارشناس یک و کارشناس دو در دسترس است');
+    showToast('این قابلیت فقط برای کارشناس مسئول دانشگاه و کارشناس سطح ملی در دسترس است');
     return;
   }
 
@@ -2397,7 +2397,7 @@ async function deletePlanFile(fullPath, cityName){
 
 document.getElementById('viewPlansBtn').addEventListener('click', () => {
   if (currentAccessLevel < 2){
-    showToast('این قابلیت فقط برای کارشناس یک و کارشناس دو در دسترس است');
+    showToast('این قابلیت فقط برای کارشناس مسئول دانشگاه و کارشناس سطح ملی در دسترس است');
     return;
   }
   document.getElementById('plansModalOverlay').classList.add('show');
