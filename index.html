@@ -24,10 +24,10 @@
   --radius:14px;
   --shadow:0 2px 10px rgba(20,40,35,.06);
   --shadow-lg:0 10px 30px rgba(20,40,35,.12);
-  --red:#C94B3F; --red-bg:#FBEAE8;
-  --orange:#D98A1F; --orange-bg:#FDF2DE;
-  --green:#2E9E5B; --green-bg:#E8F6ED;
-  --yellow:#C9A227; --yellow-bg:#FBF6DE;
+  --red:#9E2F27; --red-bg:#FBEAE8;
+  --orange:#8A5100; --orange-bg:#FDF2DE;
+  --green:#176D3B; --green-bg:#E8F6ED;
+  --yellow:#6F5900; --yellow-bg:#FBF6DE;
 }
 *{box-sizing:border-box;}
 html,body{margin:0;padding:0;}
@@ -498,30 +498,111 @@ footer.app-footer{
 }
 .user-info-row #logoutBtn{ margin-inline-start:auto;padding:6px 12px;font-size:.78rem; }
 
+/* ===== Accessibility, recovery and responsive refinements ===== */
+.sr-only{
+  position:absolute!important;width:1px!important;height:1px!important;padding:0!important;margin:-1px!important;
+  overflow:hidden!important;clip:rect(0,0,0,0)!important;white-space:nowrap!important;border:0!important;
+}
+.skip-link{
+  position:fixed;inset-block-start:10px;inset-inline-start:10px;z-index:2000;
+  padding:9px 14px;border-radius:9px;background:#fff;color:var(--primary-dark);
+  font-weight:800;text-decoration:none;box-shadow:var(--shadow-lg);transform:translateY(-180%);
+}
+.skip-link:focus{transform:translateY(0);}
+button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,
+.province-shape:focus-visible{
+  outline:3px solid #F4B942;outline-offset:3px;
+}
+#searchBox:focus-visible{outline:3px solid #F4B942;outline-offset:2px;}
+.draft-bar{
+  max-width:980px;margin:10px auto 0;padding:9px 14px;border-radius:11px;
+  background:rgba(255,255,255,.14);display:flex;align-items:center;gap:10px;flex-wrap:wrap;
+  color:#fff;font-size:.76rem;
+}
+.draft-state{display:inline-flex;align-items:center;gap:7px;font-weight:750;}
+.draft-state::before{content:"";width:9px;height:9px;border-radius:50%;background:#8BE0B0;}
+.draft-state.is-saving::before{background:#FFD37A;}
+.draft-state.is-error::before{background:#FF9B91;}
+.draft-bar .btn{padding:5px 10px;font-size:.72rem;margin-inline-start:auto;}
+.domain-header{
+  width:100%;border:0;background:transparent;color:inherit;text-align:right;font:inherit;
+}
+.domain-body[hidden]{display:none;}
+.opt{
+  width:100%;font-family:inherit;color:inherit;cursor:pointer;
+}
+.opt[aria-pressed="true"]{outline:2.5px solid var(--text);outline-offset:1px;}
+.overlay[aria-hidden="false"]{display:flex;}
+.modal:focus,.login-card:focus{outline:none;}
+#toast[role="status"]{max-width:min(520px,calc(100vw - 28px));text-align:center;}
+.map-table-wrap,.report-table-wrap{
+  max-width:980px;margin:16px auto 0;overflow-x:auto;background:var(--card);
+  border:1px solid var(--border);border-radius:12px;padding:12px;
+}
+.accessible-data-table{width:100%;border-collapse:collapse;font-size:.78rem;min-width:560px;}
+.accessible-data-table caption{text-align:right;font-weight:800;font-size:.9rem;margin-bottom:8px;}
+.accessible-data-table th,.accessible-data-table td{
+  padding:8px 10px;border-bottom:1px solid var(--border);text-align:right;vertical-align:top;
+}
+.accessible-data-table th{background:var(--bg);}
+.accessible-table-wrap{overflow-x:auto;margin-top:10px;}
+.accessible-table-wrap table{width:100%;border-collapse:collapse;font-size:.78rem;min-width:640px;}
+.accessible-table-wrap th,.accessible-table-wrap td{
+  padding:8px 10px;border-bottom:1px solid var(--border);text-align:right;vertical-align:top;
+}
+.accessible-table-wrap th{background:var(--bg);}
+details summary{cursor:pointer;font-weight:750;color:var(--primary-dark);}
+.report-chart-scroll{overflow-x:auto;padding-bottom:8px;}
+.report-chart-scroll svg{width:auto;min-width:100%;max-width:none;}
+.status-badge-incomplete{background:var(--border)!important;color:var(--text)!important;}
+.green-readable{color:#176D3B!important;}
+.orange-readable{color:#8A5100!important;}
+@media(max-width:760px){
+  .header-actions{display:grid;grid-template-columns:1fr 1fr;width:100%;}
+  .header-actions .btn{justify-content:center;white-space:normal;text-align:center;}
+  .date-row{display:grid;grid-template-columns:1fr;}
+  #cityName,#assessorName,#dateDisplay{width:100%;min-width:0;}
+  .view-tabs{display:grid;grid-template-columns:1fr 1fr;}
+  .view-tab{border-radius:10px;padding:9px 8px;}
+  .compare-picker{flex-direction:column;align-items:stretch;}
+  .compare-vs{align-self:center;}
+  .domain-header{align-items:flex-start;}
+  .domain-score{margin-inline-start:auto;}
+}
+@media(max-width:440px){
+  .header-actions,.view-tabs{grid-template-columns:1fr;}
+  #domainsContainer,.toolbar,.dashboard,.guide-section,.view-tabs{padding-inline:12px;}
+  .item,.domain-header{padding-inline:13px;}
+}
+@media(prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important;}
+}
+
 </style>
 </head>
 <body>
-<div class="login-overlay" id="loginOverlay">
-  <div class="login-card">
-    <h2>🔐 ورود به سامانه خودارزیابی شهر سالم</h2>
+<a class="skip-link" href="#mainContent">پرش به محتوای اصلی</a>
+<div class="login-overlay" id="loginOverlay" aria-hidden="false">
+  <div class="login-card" role="dialog" aria-modal="true" aria-labelledby="loginDialogTitle" tabindex="-1">
+    <h2 id="loginDialogTitle">🔐 ورود به سامانه خودارزیابی شهر سالم</h2>
     <p class="login-sub" id="loginModeHint">برای استفاده از سامانه، وارد حساب کاربری خود شوید.</p>
 
-    <div class="login-tabs">
-      <button type="button" class="login-tab is-active" id="loginTabSignin">ورود</button>
-      <button type="button" class="login-tab" id="loginTabSignup">ثبت‌نام</button>
+    <div class="login-tabs" role="tablist" aria-label="ورود یا ثبت‌نام">
+      <button type="button" role="tab" aria-selected="true" class="login-tab is-active" id="loginTabSignin">ورود</button>
+      <button type="button" role="tab" aria-selected="false" class="login-tab" id="loginTabSignup">ثبت‌نام</button>
     </div>
 
     <div class="login-field" id="loginNameField" style="display:none">
       <label for="loginName">نام و نام خانوادگی</label>
-      <input type="text" id="loginName" placeholder="مثلاً: علی محمدی">
+      <input type="text" id="loginName" placeholder="مثلاً: علی محمدی" autocomplete="name">
     </div>
     <div class="login-field" id="loginEmailField">
       <label for="loginEmail">ایمیل</label>
-      <input type="email" id="loginEmail" placeholder="name@example.com" dir="ltr">
+      <input type="email" id="loginEmail" placeholder="name@example.com" dir="ltr" autocomplete="email">
     </div>
     <div class="login-field" id="loginNationalIdField" style="display:none">
       <label for="loginNationalId">شماره ملی</label>
-      <input type="text" id="loginNationalId" placeholder="۱۰ رقم" inputmode="numeric" maxlength="10" dir="ltr">
+      <input type="text" id="loginNationalId" placeholder="۱۰ رقم" inputmode="numeric" maxlength="10" dir="ltr" autocomplete="off">
     </div>
     <div class="login-field" id="loginRoleField" style="display:none">
       <label for="loginRole">سطح دسترسی</label>
@@ -533,18 +614,18 @@ footer.app-footer{
     </div>
     <div class="login-field" id="loginPasswordField">
       <label for="loginPassword">رمز عبور</label>
-      <input type="password" id="loginPassword" placeholder="حداقل ۶ کاراکتر" dir="ltr">
+      <input type="password" id="loginPassword" placeholder="حداقل ۶ کاراکتر" dir="ltr" autocomplete="current-password">
     </div>
     <div class="login-field" id="loginForgotLinkWrap" style="text-align:left;margin:-6px 0 10px;">
       <a href="#" id="loginForgotLink" style="font-size:.72rem;color:var(--primary);text-decoration:none;">رمز عبور را فراموش کرده‌اید؟</a>
     </div>
     <div class="login-field" id="loginNewPasswordField" style="display:none">
       <label for="loginNewPassword">رمز عبور جدید</label>
-      <input type="password" id="loginNewPassword" placeholder="حداقل ۶ کاراکتر" dir="ltr">
+      <input type="password" id="loginNewPassword" placeholder="حداقل ۶ کاراکتر" dir="ltr" autocomplete="new-password">
     </div>
     <div class="login-field" id="loginConfirmPasswordField" style="display:none">
       <label for="loginConfirmPassword">تکرار رمز عبور جدید</label>
-      <input type="password" id="loginConfirmPassword" dir="ltr">
+      <input type="password" id="loginConfirmPassword" dir="ltr" autocomplete="new-password">
     </div>
 
     <p class="login-note" id="loginSignupNote" style="display:none">
@@ -564,7 +645,7 @@ footer.app-footer{
     </div>
   </div>
 </div>
-<div id="app">
+<div id="app" inert>
 
   <div class="print-header" id="printHeader">
     <div>
@@ -586,23 +667,28 @@ footer.app-footer{
         <p>ارزیابی تعاملی بر اساس ۹ حوزه و ۸۰ شاخص برنامه شهر سالم</p>
       </div>
       <div class="header-actions">
-        <button class="btn btn-solid" id="saveBtn">💾 ذخیره ارزیابی</button>
-        <button class="btn" id="loadBtn">📂 بازکردن ارزیابی</button>
-        <button class="btn btn-outline" id="printBtn">🖨️ چاپ</button>
-        <button class="btn btn-outline" id="resetBtn">♻️ شروع مجدد</button>
-        <button class="btn btn-outline" id="uploadPlanBtn" data-min-level="2" style="display:none">📎 آپلود فایل برنامه‌های عملیاتی</button>
-        <button class="btn btn-outline" id="viewPlansBtn" data-min-level="2" style="display:none">📂 فایل‌های آپلودشده</button>
-        <button class="btn btn-outline" id="exportCsvBtn" data-min-level="2" style="display:none">⬇️ خروجی CSV</button>
+        <button type="button" class="btn btn-solid" id="saveBtn">💾 ذخیره ارزیابی</button>
+        <button type="button" class="btn" id="loadBtn">📂 بازکردن ارزیابی</button>
+        <button type="button" class="btn btn-outline" id="printBtn">🖨️ چاپ</button>
+        <button type="button" class="btn btn-outline" id="resetBtn">♻️ شروع مجدد</button>
+        <button type="button" class="btn btn-outline" id="uploadPlanBtn" data-min-level="2" style="display:none">📎 آپلود فایل برنامه‌های عملیاتی</button>
+        <button type="button" class="btn btn-outline" id="viewPlansBtn" data-min-level="2" style="display:none">📂 فایل‌های آپلودشده</button>
+        <button type="button" class="btn btn-outline" id="exportCsvBtn" data-min-level="2" style="display:none">⬇️ خروجی CSV</button>
         <input type="file" id="uploadPlanFileInput" accept="application/pdf" style="display:none">
       </div>
     </div>
     <div class="date-row">
-      <label>نام شهر:</label>
-      <input type="text" id="cityName" placeholder="نام شهر">
-      <label>ارزیاب:</label>
-      <input type="text" id="assessorName" placeholder="نام ارزیاب">
-      <label>تاریخ ارزیابی:</label>
-      <div id="dateDisplay"></div>
+      <label for="cityName">نام شهر:</label>
+      <input type="text" id="cityName" placeholder="نام شهر" autocomplete="address-level2">
+      <label for="assessorName">ارزیاب:</label>
+      <input type="text" id="assessorName" placeholder="نام ارزیاب" autocomplete="name">
+      <span id="dateDisplayLabel">تاریخ ارزیابی:</span>
+      <div id="dateDisplay" role="status" aria-labelledby="dateDisplayLabel"></div>
+    </div>
+    <div class="draft-bar">
+      <span class="draft-state" id="draftState" role="status" aria-live="polite">در حال آماده‌سازی پیش‌نویس…</span>
+      <span>پاسخ‌ها و مشخصات به‌صورت خودکار در همین مرورگر ذخیره می‌شوند.</span>
+      <button type="button" class="btn btn-outline" id="undoResetBtn" hidden>بازگردانی شروع مجدد</button>
     </div>
     <div class="user-info-row" id="userInfoRow" style="display:none">
       <span id="userInfoText"></span>
@@ -613,18 +699,18 @@ footer.app-footer{
     </div>
   </header>
 
-  <div class="view-tabs">
-    <button type="button" class="view-tab is-active" id="tabAssessBtn" data-min-level="1">تکمیل ارزیابی</button>
-    <button type="button" class="view-tab" id="tabMapBtn" data-min-level="2">نقشهٔ امتیازها</button>
-    <button type="button" class="view-tab" id="tabCompareBtn" data-min-level="2">مقایسه شهرها</button>
-    <button type="button" class="view-tab" id="tabReportBtn" data-min-level="3">گزارش نموداری</button>
+  <div class="view-tabs" role="tablist" aria-label="بخش‌های سامانه">
+    <button type="button" role="tab" aria-selected="true" aria-controls="assessmentView" class="view-tab is-active" id="tabAssessBtn" data-min-level="1">تکمیل ارزیابی</button>
+    <button type="button" role="tab" aria-selected="false" aria-controls="mapView" class="view-tab" id="tabMapBtn" data-min-level="2">نقشهٔ امتیازها</button>
+    <button type="button" role="tab" aria-selected="false" aria-controls="compareView" class="view-tab" id="tabCompareBtn" data-min-level="2">مقایسه شهرها</button>
+    <button type="button" role="tab" aria-selected="false" aria-controls="reportView" class="view-tab" id="tabReportBtn" data-min-level="3">گزارش نموداری</button>
   </div>
 
-  <div id="assessmentView">
+  <div id="assessmentView" role="tabpanel" aria-labelledby="tabAssessBtn" tabindex="0">
 
-  <div class="dashboard">
+  <main class="dashboard" id="mainContent">
     <div class="gauge-card">
-      <div class="gauge-wrap">
+      <div class="gauge-wrap" id="scoreGauge" role="progressbar" aria-label="امتیاز کل ارزیابی" aria-valuemin="0" aria-valuemax="160" aria-valuenow="0">
         <svg width="150" height="150" viewBox="0 0 130 130">
           <circle cx="65" cy="65" r="54" fill="none" stroke="#E4E0D6" stroke-width="12"/>
           <circle id="gaugeRing" cx="65" cy="65" r="54" fill="none" stroke="#0E7C61" stroke-width="12"
@@ -635,23 +721,24 @@ footer.app-footer{
           <span class="max">از ۱۶۰</span>
         </div>
       </div>
-      <div class="band-pill" id="bandPill">شروع نشده</div>
+      <div class="band-pill status-badge-incomplete" id="bandPill" role="status" aria-live="polite">شروع نشده</div>
     </div>
     <div class="stats-card">
       <div class="stat-line"><span>شاخص‌های پاسخ داده شده</span><span id="answeredStat"><b>۰ / ۸۰</b></span></div>
-      <div class="progress-track"><div class="progress-fill" id="progressFill" style="width:0%;"></div></div>
+      <div class="progress-track" id="answeredProgress" role="progressbar" aria-label="پیشرفت پاسخ‌گویی" aria-valuemin="0" aria-valuemax="80" aria-valuenow="0"><div class="progress-fill" id="progressFill" style="width:0%;"></div></div>
       <div class="band-analysis" id="bandAnalysis">برای مشاهده تحلیل، ارزیابی را آغاز کنید.</div>
     </div>
-  </div>
+  </main>
 
   <div class="toolbar">
-    <input type="text" id="searchBox" placeholder="جستجوی شاخص‌ها...">
-    <button class="filter-chip active" data-filter="all">همه</button>
-    <button class="filter-chip" data-filter="answered">پاسخ داده‌شده</button>
-    <button class="filter-chip" data-filter="unanswered">پاسخ‌ نداده</button>
+    <label class="sr-only" for="searchBox">جستجوی شاخص‌ها</label>
+    <input type="search" id="searchBox" placeholder="جستجوی شاخص‌ها..." autocomplete="off">
+    <button class="filter-chip active" type="button" data-filter="all" aria-pressed="true">همه</button>
+    <button class="filter-chip" type="button" data-filter="answered" aria-pressed="false">پاسخ داده‌شده</button>
+    <button class="filter-chip" type="button" data-filter="unanswered" aria-pressed="false">پاسخ‌ نداده</button>
   </div>
 
-  <main id="domainsContainer"></main>
+  <div id="domainsContainer"></div>
 
   <section class="guide-section">
     <h2>راهنمای امتیاز کسب‌شده</h2>
@@ -660,14 +747,15 @@ footer.app-footer{
 
   </div>
 
-  <div id="mapView" style="display:none">
+  <div id="mapView" role="tabpanel" aria-labelledby="tabMapBtn" tabindex="0" hidden>
 
     <div id="mapStatus">در حال بارگذاری ارزیابی‌های ذخیره‌شده…</div>
 
     <div class="map-stage">
       <div class="map-svg-wrap" id="mapSvgWrap"></div>
-      <div class="map-tooltip" id="mapTooltip" style="display:none"></div>
+      <div class="map-tooltip" id="mapTooltip" role="tooltip" style="display:none"></div>
     </div>
+    <div class="map-table-wrap" id="mapAccessibleTable"></div>
 
     <section class="guide-section map-legend">
       <h2>راهنمای رنگ استان‌ها (میانگین امتیاز شهرهای ثبت‌شده)</h2>
@@ -683,16 +771,16 @@ footer.app-footer{
 
   </div>
 
-  <div id="compareView" style="display:none">
+  <div id="compareView" role="tabpanel" aria-labelledby="tabCompareBtn" tabindex="0" hidden>
 
     <div class="compare-picker">
       <div class="compare-picker-col">
-        <label>شهر اول</label>
+        <label for="compareSelectA">شهر اول</label>
         <select id="compareSelectA"><option value="">— انتخاب ارزیابی —</option></select>
       </div>
       <div class="compare-vs">در برابر</div>
       <div class="compare-picker-col">
-        <label>شهر دوم</label>
+        <label for="compareSelectB">شهر دوم</label>
         <select id="compareSelectB"><option value="">— انتخاب ارزیابی —</option></select>
       </div>
       <button class="btn btn-outline" id="compareRefreshBtn" type="button">🔄 به‌روزرسانی فهرست</button>
@@ -704,13 +792,13 @@ footer.app-footer{
 
   </div>
 
-  <div id="reportView" style="display:none">
+  <div id="reportView" role="tabpanel" aria-labelledby="tabReportBtn" tabindex="0" hidden>
 
     <div class="report-picker">
       <div class="report-picker-head">
         <h3>شهرهای موردنظر برای گزارش نموداری را انتخاب کنید</h3>
         <div class="report-picker-actions">
-          <button class="btn btn-outline" id="reportSelectAllBtn" type="button">انتخاب همه</button>
+          <button class="btn btn-outline" id="reportSelectAllBtn" type="button">انتخاب ۲۰ مورد اول</button>
           <button class="btn btn-outline" id="reportClearBtn" type="button">پاک‌کردن انتخاب</button>
           <button class="btn btn-outline" id="reportRefreshBtn" type="button">🔄 به‌روزرسانی فهرست</button>
         </div>
@@ -729,30 +817,30 @@ footer.app-footer{
   </footer>
 </div>
 
-<div class="overlay" id="modalOverlay">
-  <div class="modal">
-    <h3>ارزیابی‌های ذخیره‌شده</h3>
+<div class="overlay" id="modalOverlay" aria-hidden="true">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="savedAssessmentsTitle" tabindex="-1">
+    <h3 id="savedAssessmentsTitle">ارزیابی‌های ذخیره‌شده</h3>
     <div class="modal-list" id="modalList"></div>
-    <button class="modal-close" id="modalCloseBtn">بستن</button>
+    <button class="modal-close" id="modalCloseBtn" type="button">بستن</button>
   </div>
 </div>
 
-<div class="overlay" id="approvalsModalOverlay">
-  <div class="modal">
-    <h3>✅ درخواست‌های دسترسی در انتظار تأیید</h3>
+<div class="overlay" id="approvalsModalOverlay" aria-hidden="true">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="approvalsTitle" tabindex="-1">
+    <h3 id="approvalsTitle">✅ درخواست‌های دسترسی در انتظار تأیید</h3>
     <div id="approvalsList" class="modal-list"></div>
-    <button class="modal-close" id="approvalsModalCloseBtn">بستن</button>
+    <button class="modal-close" id="approvalsModalCloseBtn" type="button">بستن</button>
   </div>
 </div>
 
-<div class="overlay" id="adminsModalOverlay">
-  <div class="modal">
-    <h3>🛡️ پنل مدیران</h3>
+<div class="overlay" id="adminsModalOverlay" aria-hidden="true">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="adminsTitle" tabindex="-1">
+    <h3 id="adminsTitle">🛡️ پنل مدیران</h3>
     <p class="login-note" style="margin-bottom:14px;">مدیران سامانه به تأیید درخواست‌های دسترسی و مدیریت سایر مدیران دسترسی دارند.</p>
 
     <div class="login-field">
       <label for="grantAdminEmail">اعطای دسترسی مدیریت با ایمیل</label>
-      <input type="email" id="grantAdminEmail" placeholder="name@example.com" dir="ltr">
+      <input type="email" id="grantAdminEmail" placeholder="name@example.com" dir="ltr" autocomplete="email">
     </div>
     <div class="login-error" id="adminsPanelError" style="display:none"></div>
     <button class="btn btn-solid login-submit" id="grantAdminBtn" type="button" style="margin-bottom:18px;">اعطای دسترسی مدیریت</button>
@@ -760,22 +848,22 @@ footer.app-footer{
     <h4 style="margin:0 0 8px;font-size:.85rem;color:var(--text);">مدیران فعلی</h4>
     <div id="adminsList" class="modal-list"></div>
 
-    <button class="modal-close" id="adminsModalCloseBtn">بستن</button>
+    <button class="modal-close" id="adminsModalCloseBtn" type="button">بستن</button>
   </div>
 </div>
 
-<div class="overlay" id="plansModalOverlay">
-  <div class="modal">
-    <h3>📂 فایل‌های برنامه‌های عملیاتی</h3>
+<div class="overlay" id="plansModalOverlay" aria-hidden="true">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="plansTitle" tabindex="-1">
+    <h3 id="plansTitle">📂 فایل‌های برنامه‌های عملیاتی</h3>
     <button class="btn btn-outline" id="plansBackBtn" type="button" style="display:none;margin-bottom:10px;">→ بازگشت به فهرست شهرها</button>
     <div id="plansList" class="modal-list"></div>
-    <button class="modal-close" id="plansModalCloseBtn">بستن</button>
+    <button class="modal-close" id="plansModalCloseBtn" type="button">بستن</button>
   </div>
 </div>
 
-<div id="toast"></div>
+<div id="toast" role="status" aria-live="polite" aria-atomic="true"></div>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.8/dist/umd/supabase.js"></script>
 <script>
 const DATA = {"domains": [{"title": "حوزه ۱: سازمان‌دهی و بسیج جامعه (۷ شاخص‌)", "items": [{"num": 1, "text": "آموزش سرخوشه‌ها/داوطلبین در نیازسنجی، اولویت‌بندی، جمع‌آوری داده، پایش و گزارش‌دهی", "s0": "آموزشی برگزار نشده", "s1": "آموزش جزئی/غیرمنظم بدون مستندسازی کامل", "s2": "آموزش کامل و مستمر با مستندات و توان عملیاتی داوطلبین"}, {"num": 2, "text": "تشکیل رسمی کمیته هماهنگی شهرسالم + ثبت به‌عنوان سازمان مردم‌نهاد + تعیین وظایف اعضا", "s0": "تشکیل نشده", "s1": "تشکیل شده اما ثبت رسمی نشده یا وظایف اعضا مشخص نیست", "s2": "تشکیل، ثبت رسمی و تعیین شفاف وظایف اعضا"}, {"num": 3, "text": "مشارکت فعال سرخوشه‌ها در برنامه‌ریزی اجتماعی/بهداشتی و تضمین ارائه خدمات", "s0": "مشارکتی وجود ندارد", "s1": "مشارکت محدود/موردی", "s2": "مشارکت فعال و مستمر با تضمین ارائه خدمات"}, {"num": 4, "text": "پایش پروژه‌های اقتصادی‌اجتماعی توسط کمیته + ثبت دستاوردها/چالش‌ها + ارائه راهکار", "s0": "پایش انجام نمی‌شود", "s1": "پایش ناقص یا بدون ثبت مستند", "s2": "پایش نظام‌مند با ثبت و ارائه راهکار محلی"}, {"num": 5, "text": "برقراری ارتباط کمیته با شرکای بالقوه توسعه منطقه", "s0": "ارتباطی برقرار نشده", "s1": "تلاش‌های اولیه/محدود", "s2": "شبکه‌سازی فعال و مستمر با شرکا"}, {"num": 6, "text": "تأسیس مرکز عمومی جهت برنامه‌ها و آموزش‌های عمومی", "s0": "تأسیس نشده", "s1": "موجود اما ناقص/کم‌کاربرد", "s2": "تأسیس و بهره‌برداری فعال"}, {"num": 7, "text": "تشکیل و ثبت گروه‌های زنان و جوانان + مشارکت در مداخلات توسعه محلی", "s0": "تشکیل نشده", "s1": "تشکیل شده، مشارکت محدود", "s2": "تشکیل، ثبت و مشارکت فعال"}], "icon": "🤝"}, {"title": "حوزه ۲: همکاری و مشارکت بین‌بخشی (۷ شاخص‌)", "items": [{"num": 8, "text": "معرفی اعضای کمیته از بخش‌های مختلف", "s0": "معرفی نشده", "s1": "معرفی جزئی/تک‌بخشی", "s2": "معرفی کامل از تمام بخش‌های ذی‌ربط"}, {"num": 9, "text": "تشکیل کمیته زیر نظر شهردار/فرماندار با نمایندگان سازمانی + ثبت صورتجلسات", "s0": "تشکیل نشده", "s1": "تشکیل شده، ثبت صورتجلسه ناقص", "s2": "تشکیل رسمی + ثبت و گزارش کامل صورتجلسات"}, {"num": 10, "text": "انتخاب هماهنگ‌کننده برنامه + تأمین امکانات فیزیکی", "s0": "انتخاب نشده", "s1": "انتخاب شده، امکانات ناکافی", "s2": "انتخاب هماهنگ‌کننده و تأمین کامل امکانات"}, {"num": 11, "text": "برگزاری جلسات مشترک تیم بین‌بخشی با کمیته + ارائه پیشنهاد تخصصی", "s0": "جلسه‌ای برگزار نمی‌شود", "s1": "برگزاری موردی/غیرمنظم", "s2": "برگزاری منظم با پیشنهادات تخصصی مستند"}, {"num": 12, "text": "شناسایی و به‌کارگیری مشارکت‌کنندگان بالقوه در پروژه مشترک", "s0": "شناسایی نشده", "s1": "شناسایی شده، به‌کارگیری ناقص", "s2": "شناسایی و به‌کارگیری فعال در پروژه مشترک"}, {"num": 13, "text": "ثبت و گزارش مسائل مالی پروژه‌های مشترک", "s0": "ثبت نمی‌شود", "s1": "ثبت ناقص", "s2": "ثبت و گزارش‌دهی کامل و شفاف"}, {"num": 14, "text": "ثبت و انتشار نتایج موفق + استراتژی استفاده از فرهنگ محلی", "s0": "ثبت/انتشار نشده", "s1": "ثبت جزئی، استراتژی فرهنگی وجود ندارد", "s2": "ثبت، انتشار و اجرای استراتژی فرهنگی مدون"}], "icon": "🧩"}, {"title": "حوزه ۳: فعالیت‌های اعتباری خرد (۷ شاخص‌)", "items": [{"num": 15, "text": "شناسایی افراد فقیر/نیازمند و اولویت‌بندی وام کم‌بهره", "s0": "شناسایی نشده", "s1": "شناسایی جزئی بدون معیار مشخص", "s2": "شناسایی مبتنی‌بر معیار مشخص و اولویت‌بندی مستند"}, {"num": 16, "text": "ارتباط مراکز مهارت‌آموزی با فعالیت‌های اعتباری برای خودکفایی", "s0": "ارتباطی وجود ندارد", "s1": "ارتباط ضعیف/غیرمنسجم", "s2": "ارتباط نظام‌مند و اثربخش"}, {"num": 17, "text": "ثبت فعالیت‌های مالی توسط مسئول مالی کمیته", "s0": "ثبت نمی‌شود", "s1": "ثبت ناقص/نامنظم", "s2": "ثبت کامل و منظم توسط مسئول مالی"}, {"num": 18, "text": "پیگیری و جایگزینی منظم وام‌ها/بدهی‌ها", "s0": "پیگیری نمی‌شود", "s1": "پیگیری موردی", "s2": "پیگیری و جایگزینی منظم و مستمر"}, {"num": 19, "text": "افتتاح حساب بانکی اختصاصی کمیته برای امور مالی", "s0": "افتتاح نشده", "s1": "افتتاح شده، استفاده ناقص", "s2": "افتتاح و استفاده کامل برای تمام امور مالی"}, {"num": 20, "text": "تفکیک کارمزد وام برای فعالیت‌های اجتماعی", "s0": "تفکیک نمی‌شود", "s1": "تفکیک جزئی", "s2": "تفکیک کامل و مستند"}, {"num": 21, "text": "اطمینان سرخوشه‌ها از بازپرداخت به‌موقع اقساط", "s0": "اطمینانی حاصل نمی‌شود", "s1": "پیگیری ضعیف", "s2": "پیگیری و اطمینان مستمر از بازپرداخت به‌موقع"}], "icon": "💰"}, {"title": "حوزه ۴: آموزش و سوادآموزی (۵ شاخص‌)", "items": [{"num": 22, "text": "ثبت‌نام و تحصیل تمام کودکان (دختر و پسر) در مدارس", "s0": "پوشش تحصیلی وجود ندارد", "s1": "پوشش جزئی/نابرابر جنسیتی", "s2": "پوشش کامل و برابر برای تمام کودکان"}, {"num": 23, "text": "جلسات منظم مدیران مدارس با کمیته توسعه، والدین و ذینفعان", "s0": "جلسه‌ای برگزار نمی‌شود", "s1": "برگزاری موردی/غیرمنظم", "s2": "برگزاری منظم با پیگیری رفع مشکلات"}, {"num": 24, "text": "اجرای استانداردهای کیفیت آموزشی در مدارس", "s0": "اجرا نمی‌شود", "s1": "اجرای جزئی", "s2": "اجرای کامل استانداردها"}, {"num": 25, "text": "تشکیل کارگروه ویژه آموزش با هماهنگی آموزش‌وپرورش", "s0": "تشکیل نشده", "s1": "تشکیل شده، فعالیت محدود", "s2": "تشکیل و ارزیابی فعال و مستمر مدارس"}, {"num": 26, "text": "تشویق زنان/جوانان برای مشارکت در کمپین ضد بی‌سوادی", "s0": "تشویقی صورت نمی‌گیرد", "s1": "تشویق محدود", "s2": "تشویق فعال و مشارکت مستند"}], "icon": "📚"}, {"title": "حوزه ۵: توسعه سلامت (۲۶ شاخص‌)", "items": [{"num": 27, "text": "آموزش سرخوشه‌ها درخصوص اولویت‌های سلامت و برنامه‌های مرتبط", "s0": "آموزشی نبوده", "s1": "آموزش ناقص", "s2": "آموزش کامل و مستند"}, {"num": 28, "text": "ثبت و گزارش تولد، مرگ و آمار حیاتی توسط داوطلبین", "s0": "ثبت نمی‌شود", "s1": "ثبت ناقص/نامنظم", "s2": "ثبت و گزارش‌دهی کامل و منظم"}, {"num": 29, "text": "راه‌اندازی نظام ارجاع مؤثر با همکاری سیستم بهداشتی", "s0": "راه‌اندازی نشده", "s1": "راه‌اندازی شده، اثربخشی پایین", "s2": "راه‌اندازی و عملکرد اثربخش نظام ارجاع"}, {"num": 30, "text": "آموزش و مشارکت جامعه در پروژه‌های تحقیقاتی جامعه‌محور", "s0": "آموزش/مشارکتی نیست", "s1": "آموزش یا مشارکت جزئی", "s2": "آموزش کامل و مشارکت فعال"}, {"num": 31, "text": "تشکیل کارگروه فرعی نظارت بر سیستم بهداشتی درمانی", "s0": "تشکیل نشده", "s1": "تشکیل شده، فعالیت محدود", "s2": "تشکیل و نظارت فعال و مستمر"}, {"num": 32, "text": "موجودی داروها، واکسن و تجهیزات ضروری مطابق نیاز", "s0": "موجود نیست", "s1": "موجودی ناقص", "s2": "موجودی کامل و متناسب با نیاز"}, {"num": 33, "text": "ارزیابی کیفیت خدمات، رضایت مشتری، دانش کارکنان و اجرای مداخلات", "s0": "ارزیابی نمی‌شود", "s1": "ارزیابی جزئی بدون مداخله", "s2": "ارزیابی کامل و اجرای مداخلات اصلاحی"}, {"num": 34, "text": "مراقبت به‌موقع بارداری + برنامه زایمان ایمن با ماما", "s0": "مراقبتی ارائه نمی‌شود", "s1": "ارائه ناقص/موردی", "s2": "ارائه کامل و دسترسی به زایمان ایمن"}, {"num": 35, "text": "مراقبت پس از زایمان حداقل ۴۰ روز برای تمام مادران", "s0": "ارائه نمی‌شود", "s1": "ارائه ناقص/جزئی", "s2": "ارائه کامل به تمام مادران"}, {"num": 36, "text": "واکسیناسیون کامل کودکان زیر یک سال", "s0": "انجام نمی‌شود", "s1": "پوشش ناقص", "s2": "پوشش کامل و مستند"}, {"num": 37, "text": "ثبت اطلاعات نوزادان و واکسیناسیون مطابق برنامه کشوری", "s0": "ثبت/واکسیناسیون نمی‌شود", "s1": "ثبت یا واکسیناسیون ناقص", "s2": "ثبت کامل و واکسیناسیون مطابق برنامه"}, {"num": 38, "text": "مشارکت فعال در کمپین فلج اطفال (در صورت وجود)", "s0": "مشارکتی نیست", "s1": "مشارکت محدود", "s2": "مشارکت فعال و مستند"}, {"num": 39, "text": "پایش رشد و مراقبت کودکان زیر ۵ سال", "s0": "ارائه نمی‌شود", "s1": "پوشش ناقص", "s2": "پوشش کامل و مستمر"}, {"num": 40, "text": "شناسایی و درمان کمبود ویتامین A، آهن و کم‌خونی", "s0": "شناسایی نمی‌شود", "s1": "شناسایی جزئی بدون پیگیری", "s2": "شناسایی، درمان و پیگیری کامل"}, {"num": 41, "text": "اجرای استراتژی DOTS با مشارکت داوطلبین", "s0": "اجرا نمی‌شود", "s1": "اجرای ناقص", "s2": "اجرای کامل با مشارکت داوطلبین"}, {"num": 42, "text": "اجرای برنامه کنترل مالاریا با مشارکت داوطلبین", "s0": "اجرا نمی‌شود", "s1": "اجرای ناقص", "s2": "اجرای فعال و مستمر"}, {"num": 43, "text": "گزارش موارد مشکوک مالاریا/سل/ایدز توسط داوطلبین و پیگیری", "s0": "گزارش نمی‌شود", "s1": "گزارش‌دهی ناقص", "s2": "گزارش و پیگیری منظم"}, {"num": 44, "text": "آموزش جامعه در خصوص راه‌های انتقال و پیشگیری از ایدز", "s0": "آموزشی نبوده", "s1": "آموزش محدود", "s2": "آموزش کامل و فراگیر"}, {"num": 45, "text": "شناسایی بیماران مزمن و برنامه پیگیری با مشارکت داوطلبین", "s0": "شناسایی نمی‌شود", "s1": "شناسایی بدون برنامه پیگیری", "s2": "شناسایی، تدوین و اجرای برنامه پیگیری"}, {"num": 46, "text": "شناسایی بیماری‌های روانی/سوءمصرف مواد + حمایت و آموزش جامعه", "s0": "شناسایی نمی‌شود", "s1": "شناسایی بدون حمایت/آموزش", "s2": "شناسایی، حمایت و آموزش کامل"}, {"num": 47, "text": "شناسایی افراد با ناتوانی جسمی و حمایت اجتماعی", "s0": "شناسایی نمی‌شود", "s1": "شناسایی بدون حمایت", "s2": "شناسایی و حمایت اجتماعی کامل"}, {"num": 48, "text": "شناسایی مناطق پرخطر و اقدام کاهش آسیب", "s0": "شناسایی نمی‌شود", "s1": "شناسایی بدون اقدام", "s2": "شناسایی و اقدام مؤثر"}, {"num": 49, "text": "شهر عاری از جرم، خشونت علیه زنان/مردان/نژادها", "s0": "وضعیت نامطلوب گسترده", "s1": "بهبود جزئی", "s2": "وضعیت مطلوب و مستند"}, {"num": 50, "text": "ارتقای دوران کودکی و ایجاد جامعه/خانه دوستدار کودک", "s0": "اقدامی صورت نگرفته", "s1": "اقدام جزئی", "s2": "اقدام کامل و نهادینه‌شده"}, {"num": 51, "text": "اجرای برنامه مدارس مروج سلامت در تمام مدارس", "s0": "اجرا نمی‌شود", "s1": "اجرای جزئی/برخی مدارس", "s2": "اجرا در تمام مدارس شهر"}, {"num": 52, "text": "اجرای بهداشت و ایمنی حرفه‌ای + دسترسی به کمک‌های اولیه در محیط کار", "s0": "اجرا نمی‌شود", "s1": "اجرای ناقص", "s2": "اجرا کامل و دسترسی تضمین‌شده"}], "icon": "🩺"}, {"title": "حوزه ۶: آب، فاضلاب، امنیت غذایی و آلودگی هوا (۱۱ شاخص‌)", "items": [{"num": 53, "text": "تمیزی محل اجرای برنامه و وجود فضای سبز کافی", "s0": "فضای سبز وجود ندارد، محیط نامناسب", "s1": "فضای سبز محدود یا نامتناسب", "s2": "محیط تمیز و فضای سبز کافی و مستند"}, {"num": 54, "text": "برنامه مؤثر مدیریت پسماند جامد با تکیه بر جامعه", "s0": "برنامه‌ای وجود ندارد", "s1": "برنامه وجود دارد اما اجرا ناقص", "s2": "برنامه مؤثر و اجراشده با مشارکت جامعه"}, {"num": 55, "text": "نقشه منابع آب + حفاظت از منابع + برنامه تصفیه آب + آگاهی کمیته", "s0": "هیچ‌کدام وجود ندارد", "s1": "برخی موارد موجود، آگاهی کمیته ناقص", "s2": "نقشه، حفاظت، برنامه تصفیه و آگاهی کامل کمیته"}, {"num": 56, "text": "دسترسی همه خانوارها به آب آشامیدنی و فاضلاب + آگاهی از خطرات و روش‌های آلودگی‌زدایی", "s0": "دسترسی وجود ندارد، آگاهی صفر", "s1": "دسترسی جزئی یا آگاهی ناقص", "s2": "دسترسی کامل و آگاهی مستند خانوارها"}, {"num": 57, "text": "آشنایی سرخوشه‌ها با حفظ محیط سالم و مداخلات مرتبط (بازار سلامت، بیمارستان ارتقادهنده، مدارس مروج)", "s0": "آشنایی وجود ندارد", "s1": "آشنایی جزئی با برخی مداخلات", "s2": "آشنایی کامل با تمام مداخلات مرتبط"}, {"num": 58, "text": "مشارکت جامعه در ایمنی غذایی + پایش تمام مراکز غذای سالم توسط اداره غذا", "s0": "مشارکت/پایش وجود ندارد", "s1": "مشارکت یا پایش جزئی", "s2": "مشارکت فعال جامعه و پایش کامل مراکز"}, {"num": 59, "text": "دسترسی آسان به مراکز فروش غذای سالم با محصولات ضروری", "s0": "دسترسی وجود ندارد", "s1": "دسترسی محدود یا محصولات ناقص", "s2": "دسترسی آسان و تأمین کامل محصولات ضروری"}, {"num": 60, "text": "ممنوعیت سیگار در مکان‌های بسته/عمومی + برنامه شهر بدون دخانیات", "s0": "ممنوعیت/برنامه وجود ندارد", "s1": "ممنوعیت جزئی یا برنامه تدوین‌نشده", "s2": "ممنوعیت اجراشده و برنامه مدون شهر بدون دخانیات"}, {"num": 61, "text": "مرکز مدیریت کیفیت هوا با مشارکت شهرداری + پایش منظم + آگاهی مردم", "s0": "هیچ‌کدام وجود ندارد", "s1": "مرکز تشکیل شده اما پایش/آگاهی ناقص", "s2": "مرکز فعال، پایش منظم و آگاهی عمومی مستند"}, {"num": 62, "text": "اجرای مداخلات کاهش آلودگی هوا توسط برنامه‌ریزان شهری", "s0": "مداخله‌ای اجرا نمی‌شود", "s1": "مداخلات محدود/موردی", "s2": "مداخلات جامع و مستمر"}, {"num": 63, "text": "بررسی طرح‌های شهری و ساختمانی از نظر تأثیر بر آلودگی هوا قبل از تأیید", "s0": "بررسی انجام نمی‌شود", "s1": "بررسی موردی/غیرنظام‌مند", "s2": "بررسی اجباری و نظام‌مند پیش از تأیید"}], "icon": "💧"}, {"title": "حوزه ۷: مرکز اطلاعات مبتنی بر جامعه (۵ شاخص‌)", "items": [{"num": 64, "text": "ایجاد مرکز اطلاعات جامعه‌محور + آموزش سرخوشه‌ها/داوطلبین و کمیته در جمع‌آوری، آنالیز و استفاده از اطلاعات", "s0": "مرکز ایجاد نشده، آموزشی نبوده", "s1": "مرکز ایجاد شده اما آموزش ناقص", "s2": "مرکز فعال و آموزش کامل تمام اعضا"}, {"num": 65, "text": "نمایش اطلاعات کلیدی در مرکز/اداره شهر سالم و در دسترس قراردادن برای جامعه و مراکز ذیربط", "s0": "اطلاعاتی نمایش داده نمی‌شود", "s1": "نمایش جزئی یا دسترسی محدود", "s2": "نمایش کامل و دسترسی فعال برای همه ذینفعان"}, {"num": 66, "text": "استفاده کمیته‌ها از اطلاعات کلیدی برای پایش و حمایت از برنامه", "s0": "استفاده نمی‌شود", "s1": "استفاده موردی/غیرمنظم", "s2": "استفاده منظم و مستند در پایش و تصمیم‌گیری"}, {"num": 67, "text": "ثبت، به‌روز بودن و دسترسی کمیته‌ها به فرم‌ها، نتایج و اطلاعات ارزیابی اولیه", "s0": "ثبت نمی‌شود", "s1": "ثبت ناقص یا به‌روز نیست", "s2": "ثبت کامل، به‌روز و در دسترس کمیته‌ها"}, {"num": 68, "text": "ایجاد پروفایل شهری + به‌روزرسانی منظم + استفاده در برنامه‌ریزی و پایش", "s0": "پروفایل ایجاد نشده", "s1": "پروفایل موجود اما به‌روز/مورداستفاده نیست", "s2": "پروفایل کامل، به‌روز و فعالانه مورداستفاده"}], "icon": "🗂️"}, {"title": "حوزه ۸: توسعه مهارت‌ها، آموزش شغلی و ظرفیت‌سازی (۶ شاخص‌)", "items": [{"num": 69, "text": "ارزیابی و ارتقای علاقه‌مندی‌ها، مهارت‌ها و تکنولوژی‌های محلی", "s0": "ارزیابی/ارتقایی صورت نگرفته", "s1": "ارزیابی انجام شده اما ارتقا ناقص", "s2": "ارزیابی و ارتقای فعال و مستمر"}, {"num": 70, "text": "فعالیت مراکز مهارت‌آموزی برای زنان و مردان با مشارکت بین‌بخشی و ارتباط با بازار محلی", "s0": "مرکزی فعال نیست", "s1": "مرکز فعال اما مشارکت بین‌بخشی یا ارتباط با بازار ضعیف", "s2": "فعالیت کامل با مشارکت بین‌بخشی و ارتباط مؤثر با بازار"}, {"num": 71, "text": "اولویت‌دهی کمیته به وام‌های کم‌هزینه برای فارغ‌التحصیلان فنی", "s0": "اولویت‌دهی وجود ندارد", "s1": "اولویت‌دهی جزئی/غیرمنظم", "s2": "اولویت‌دهی رسمی و مستند"}, {"num": 72, "text": "اداره مراکز آموزش فنی توسط بخش خصوصی یا سازمان‌های مردم‌نهاد", "s0": "مرکزی وجود ندارد", "s1": "مراکز موجود اما مدیریت ناکارآمد", "s2": "مراکز فعال با مدیریت کارآمد خصوصی/مردم‌نهاد"}, {"num": 73, "text": "ایجاد و اداره مراکز کامپیوتر، کلاس‌های زبان، امکانات ورزشی توسط بخش خصوصی/مردم‌نهاد", "s0": "هیچ مرکزی وجود ندارد", "s1": "برخی مراکز موجود", "s2": "طیف کامل مراکز فعال و در دسترس"}, {"num": 74, "text": "شناسایی و حمایت از افراد خلاق", "s0": "شناسایی/حمایتی صورت نگرفته", "s1": "شناسایی شده اما حمایت ناقص", "s2": "شناسایی و حمایت فعال و مستند"}], "icon": "🛠️"}, {"title": "حوزه ۹: آمادگی و پاسخ در فوریت‌ها (۶ شاخص‌)", "items": [{"num": 75, "text": "شناسایی و ثبت وقایع اورژانسی ۲۰ سال گذشته", "s0": "شناسایی/ثبت نشده", "s1": "شناسایی جزئی یا ثبت ناقص", "s2": "شناسایی و ثبت کامل و مستند"}, {"num": 76, "text": "تشکیل کارگروه آمادگی و پاسخگویی اورژانسی + ابلاغ وظایف به اعضا", "s0": "تشکیل نشده", "s1": "تشکیل شده، وظایف ابلاغ نشده یا ناقص", "s2": "تشکیل رسمی و ابلاغ کامل وظایف"}, {"num": 77, "text": "آماده‌سازی پروفایل شهر + نگهداری نسخه خارج از شهر", "s0": "پروفایل آماده نشده", "s1": "پروفایل موجود اما نسخه خارجی ندارد", "s2": "پروفایل کامل با نسخه نگهداری‌شده خارج از شهر"}, {"num": 78, "text": "آموزش سرخوشه‌ها/داوطلبین در برنامه‌های آمادگی اورژانسی + توانایی ارائه کمک‌های اولیه", "s0": "آموزشی نبوده", "s1": "آموزش جزئی، توانایی کمک‌های اولیه ناقص", "s2": "آموزش کامل و توانایی مستند ارائه کمک‌های اولیه"}, {"num": 79, "text": "تدوین برنامه مدیریت بحران + توافق سازمان‌ها + آگاهی جامعه و شناخت مسئولین", "s0": "برنامه‌ای وجود ندارد", "s1": "برنامه تدوین شده اما توافق/آگاهی ناقص", "s2": "برنامه کامل، توافق سازمانی و آگاهی عمومی مستند"}, {"num": 80, "text": "شناسایی گروه‌های آسیب‌پذیر (مادران باردار، معلولین، بیماران مزمن، سالمندان، بیماران روانی) + اطلاع‌رسانی به سازمان‌های مدیریت بحران", "s0": "شناسایی/اطلاع‌رسانی نشده", "s1": "شناسایی جزئی یا اطلاع‌رسانی ناقص", "s2": "شناسایی کامل و اطلاع‌رسانی مستند به تمام سازمان‌های ذیربط"}], "icon": "🚨"}], "bands": [{"label": "قرمز (ضعیف)", "range": "0-40", "analysis": "بیشتر شاخصها امتیاز ۰ گرفته اند؛ شهر فاقد اکثر زیرساختها و شواهد لازم است.", "recommendations": ["اولویت‌بندی فوری شاخص‌های بنیادین (به‌ویژه حوزهٔ ۱ و ۲ که پیش‌نیاز سایر حوزه‌ها هستند) پیش از ورود به شاخص‌های تخصصی‌تر", "تشکیل تیم راهبری اضطراری با حضور مدیر ارشد شهری برای رفع موانع ساختاری", "تدوین برنامهٔ اقدام کوتاه‌مدت (۳ تا ۶ ماهه) با تمرکز صرف بر «ایجاد پیش‌نیازها» نه «بهبود کیفیت»", "جلب حمایت سیاسی و تخصیص منابع حداقلی برای خروج از وضعیت بحرانی", "بازنگری در تخصیص وظایف؛ احتمال وجود خلأ در مسئولیت‌پذیری نهادی"]}, {"label": "نارنجی (کمتر از حد انتظار)", "range": "41-80", "analysis": "ترکیبی از امتیازهای ۰ و ۱ غالب است؛ اقدامات اولیه انجام شده اما تحقق کامل شاخصها بسیار محدود است.", "recommendations": ["شناسایی شاخص‌های «تحقق جزئی» (امتیاز ۱) و تمرکز بر تکمیل مستندسازی و شواهد ناقص آن‌ها", "نهادینه‌سازی فعالیت‌های موردی موجود در قالب رویه‌های مکتوب و تکرارپذیر", "تدوین تقویم زمان‌بندی‌شدهٔ ۶ تا ۱۲ ماهه با نقاط کنترل (Milestone) سه‌ماهه", "تقویت هماهنگی بین‌بخشی، به‌ویژه در حوزه‌هایی که همپوشانی وظایف دارند (مانند حوزهٔ ۲)", "آموزش تکمیلی کادر اجرایی برای رفع شکاف دانشی مانع تحقق کامل شاخص‌ها"]}, {"label": "زرد (نسبتاً قابل قبول)", "range": "81-120", "analysis": "بخش عمده ای از شاخصها حداقل امتیاز ۱ (تحقق جزئی) و برخی امتیاز ۲ دارند؛ عملکرد در حد میانه است.", "recommendations": ["تحلیل ریشه‌ای (Root Cause Analysis) شاخص‌های باقی‌مانده در سطح صفر یا یک برای تعیین علت عدم تکمیل", "حرکت از رویکرد «کمّی» به «کیفی»؛ تمرکز بر ارتقای شواهد از سطح ناقص به مستند و کامل", "استقرار نظام پایش دوره‌ای (ترجیحاً فصلی) برای جلوگیری از رکود در همین سطح", "بهره‌گیری از تجارب موفق حوزه‌های قوی‌تر برنامه به‌عنوان الگو برای حوزه‌های ضعیف‌تر (یادگیری درون‌سازمانی)", "آماده‌سازی برای ارزیابی خارجی/گواهی‌دهی، در صورت وجود چنین مرحله‌ای در برنامهٔ شهر سالم"]}, {"label": "سبز (مطلوب)", "range": "121-160", "analysis": "اکثریت شاخصها امتیاز ۲ (تحقق کامل با شواهد مستند) گرفته اند؛ شهر به استانداردهای برنامه شهر سالم نزدیک است.", "recommendations": ["تدوین سازوکار پایداری (Sustainability) برای حفظ دستاوردها در برابر تغییرات مدیریتی یا کاهش منابع", "مستندسازی و انتشار تجربیات موفق به‌عنوان الگوی قابل تعمیم به سایر مناطق یا شهرها", "تمرکز بر شاخص‌های باقی‌ماندهٔ سطح ۱ برای دستیابی به تحقق کامل (۱۰۰٪)", "ورود به فاز ارتقای کیفی فراتر از الزامات حداقلی، مانند نوآوری در مداخلات محلی", "در نظر گرفتن این حوزه‌ها به‌عنوان منبع منتورینگ برای حوزه‌ها یا شهرهای دارای عملکرد پایین‌تر"]}], "maxScore": 160, "totalItems": 80};
 const persianDigits = ['۰','۱','۲','۳','۴','۵','۶','۷','۸','۹'];
@@ -867,6 +955,138 @@ const HC_RECOMMENDED_ACTIONS = {
 let scores = {}; // itemNum -> 0|1|2
 let currentSearch = '';
 let statusFilter = 'all'; // all | answered | unanswered
+let assessmentDate = '';
+let loadedAssessmentId = null;
+let saveInProgress = false;
+let draftDirty = false;
+let draftTimer = null;
+let lastResetSnapshot = null;
+let dialogReturnFocus = null;
+const DRAFT_KEY = 'healthy-city-assessment-draft-v2';
+const MAX_REPORT_RECORDS = 20;
+const MAX_PLAN_FILE_SIZE = 25 * 1024 * 1024;
+
+function escapeHtml(value){
+  return String(value ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
+function maskNationalId(value){
+  const s = String(value || '');
+  return s.length >= 4 ? '••••••' + s.slice(-4) : '—';
+}
+
+function setDraftStatus(text, state){
+  const el = document.getElementById('draftState');
+  if (!el) return;
+  el.textContent = text;
+  el.className = 'draft-state' + (state ? ' is-' + state : '');
+}
+
+function getDraftPayload(){
+  return {
+    version: 2,
+    scores: {...scores},
+    city: document.getElementById('cityName')?.value || '',
+    assessor: document.getElementById('assessorName')?.value || '',
+    date: assessmentDate,
+    loadedAssessmentId,
+    owner: typeof currentAuthEmail === 'string' ? currentAuthEmail : '',
+    updatedAt: new Date().toISOString()
+  };
+}
+
+function flushDraft(){
+  if (!document.getElementById('cityName')) return;
+  try {
+    localStorage.setItem(DRAFT_KEY, JSON.stringify(getDraftPayload()));
+    draftDirty = false;
+    setDraftStatus('پیش‌نویس روی این دستگاه ذخیره شد', 'saved');
+  } catch (error) {
+    setDraftStatus('ذخیرهٔ پیش‌نویس روی این دستگاه ممکن نیست', 'error');
+  }
+}
+
+function scheduleDraftSave(){
+  draftDirty = true;
+  setDraftStatus('در حال ذخیرهٔ پیش‌نویس…', 'saving');
+  clearTimeout(draftTimer);
+  draftTimer = setTimeout(flushDraft, 450);
+}
+
+function restoreDraft(){
+  try {
+    const raw = localStorage.getItem(DRAFT_KEY);
+    if (!raw) return false;
+    const draft = JSON.parse(raw);
+    if (!draft || draft.version !== 2 || typeof draft.scores !== 'object') return false;
+    scores = {...draft.scores};
+    document.getElementById('cityName').value = draft.city || '';
+    document.getElementById('assessorName').value = draft.assessor || '';
+    loadedAssessmentId = draft.loadedAssessmentId || null;
+    setAssessmentDate(draft.date || '');
+    setDraftStatus('پیش‌نویس قبلی بازیابی شد', 'saved');
+    return true;
+  } catch (error) {
+    localStorage.removeItem(DRAFT_KEY);
+    return false;
+  }
+}
+
+function discardDraftFromAnotherAccount(email){
+  try {
+    const draft = JSON.parse(localStorage.getItem(DRAFT_KEY) || 'null');
+    if (!draft?.owner || draft.owner === email) return false;
+    localStorage.removeItem(DRAFT_KEY);
+    scores = {};
+    loadedAssessmentId = null;
+    document.getElementById('cityName').value = '';
+    document.getElementById('assessorName').value = '';
+    setAssessmentDateToday();
+    buildDomains();
+    refreshAll();
+    setDraftStatus('پیش‌نویس تازه برای این حساب ساخته شد', 'saved');
+    return true;
+  } catch (error) {
+    return false;
+  }
+}
+
+function openDialog(overlayId, focusSelector){
+  const overlay = document.getElementById(overlayId);
+  if (!overlay) return;
+  dialogReturnFocus = document.activeElement;
+  overlay.classList.add('show');
+  overlay.setAttribute('aria-hidden', 'false');
+  const target = focusSelector ? overlay.querySelector(focusSelector) : overlay.querySelector('[role="dialog"]');
+  requestAnimationFrame(() => target?.focus());
+}
+
+function closeDialog(overlayId){
+  const overlay = document.getElementById(overlayId);
+  if (!overlay) return;
+  overlay.classList.remove('show');
+  overlay.setAttribute('aria-hidden', 'true');
+  if (dialogReturnFocus && typeof dialogReturnFocus.focus === 'function') dialogReturnFocus.focus();
+  dialogReturnFocus = null;
+}
+
+function trapDialogFocus(event){
+  const login = document.getElementById('loginOverlay');
+  const overlay = document.querySelector('.overlay.show') ||
+    (login && login.style.display !== 'none' ? login : null);
+  if (!overlay || event.key !== 'Tab') return;
+  const focusable = [...overlay.querySelectorAll('button:not([disabled]), input:not([disabled]), select:not([disabled]), a[href], [tabindex]:not([tabindex="-1"])')]
+    .filter(el => !el.hidden && el.offsetParent !== null);
+  if (!focusable.length) return;
+  const first = focusable[0], last = focusable[focusable.length - 1];
+  if (event.shiftKey && document.activeElement === first){ event.preventDefault(); last.focus(); }
+  else if (!event.shiftKey && document.activeElement === last){ event.preventDefault(); first.focus(); }
+}
 
 /* ---------------- Jalali calendar (pure JS, no deps) ---------------- */
 function div(a,b){ return ~~(a/b); }
@@ -907,10 +1127,14 @@ function todayJalali(){
 
 /* Assessment date is no longer user-editable — it's always set to the day
    the assessment is being taken. */
+function setAssessmentDate(value){
+  assessmentDate = String(value || '').trim();
+  document.getElementById('dateDisplay').textContent = assessmentDate || '—';
+}
+
 function setAssessmentDateToday(){
   const t = todayJalali();
-  document.getElementById('dateDisplay').textContent =
-    pd(t[2]) + ' ' + jMonthNames[t[1]-1] + ' ' + pd(t[0]);
+  setAssessmentDate(pd(t[2]) + ' ' + jMonthNames[t[1]-1] + ' ' + pd(t[0]));
 }
 
 /* ---------------- Rendering ---------------- */
@@ -938,8 +1162,12 @@ function buildDomains(){
     card.className = 'domain-card';
     card.dataset.domainIndex = di;
 
-    const header = document.createElement('div');
+    const header = document.createElement('button');
     header.className = 'domain-header';
+    header.type = 'button';
+    header.id = 'domainHeader-' + di;
+    header.setAttribute('aria-expanded', 'false');
+    header.setAttribute('aria-controls', 'domainBody-' + di);
     header.innerHTML = `
       <span class="domain-icon">${dm.icon}</span>
       <div class="domain-title">
@@ -950,9 +1178,10 @@ function buildDomains(){
       <span class="domain-chevron">▾</span>
     `;
     header.onclick = () => {
-      card.classList.toggle('open');
+      const isOpen = card.classList.toggle('open');
       const body = card.querySelector('.domain-body');
-      body.style.maxHeight = card.classList.contains('open') ? body.scrollHeight + 'px' : '0px';
+      body.hidden = !isOpen;
+      header.setAttribute('aria-expanded', String(isOpen));
     };
     card.appendChild(header);
 
@@ -965,6 +1194,10 @@ function buildDomains(){
 
     const body = document.createElement('div');
     body.className = 'domain-body';
+    body.id = 'domainBody-' + di;
+    body.hidden = true;
+    body.setAttribute('role', 'region');
+    body.setAttribute('aria-labelledby', header.id);
 
     dm.items.forEach(it => {
       const itemEl = document.createElement('div');
@@ -985,14 +1218,19 @@ function buildDomains(){
 
       const opts = document.createElement('div');
       opts.className = 'item-options';
+      opts.setAttribute('role', 'group');
+      opts.setAttribute('aria-label', 'امتیاز شاخص ' + pd(it.num));
       [['0',it.s0],['1',it.s1],['2',it.s2]].forEach(([lvl,txt]) => {
-        const opt = document.createElement('div');
+        const opt = document.createElement('button');
+        opt.type = 'button';
         opt.className = 'opt opt' + lvl;
+        opt.setAttribute('aria-pressed', 'false');
         opt.innerHTML = `<span class="opt-badge">${pd(lvl)}</span><span>${txt}</span>`;
         opt.onclick = (e) => {
           e.stopPropagation();
           scores[it.num] = parseInt(lvl,10);
           refreshAll();
+          scheduleDraftSave();
         };
         opts.appendChild(opt);
       });
@@ -1027,10 +1265,18 @@ function refreshAll(){
         dTotal += val; dAnswered++;
         total += val; answered++;
         dot.classList.add('s'+val);
-        itemEl.querySelectorAll('.opt').forEach(o => o.classList.remove('selected'));
-        itemEl.querySelector('.opt' + val).classList.add('selected');
+        itemEl.querySelectorAll('.opt').forEach(o => {
+          o.classList.remove('selected');
+          o.setAttribute('aria-pressed', 'false');
+        });
+        const selected = itemEl.querySelector('.opt' + val);
+        selected.classList.add('selected');
+        selected.setAttribute('aria-pressed', 'true');
       } else {
-        itemEl.querySelectorAll('.opt').forEach(o => o.classList.remove('selected'));
+        itemEl.querySelectorAll('.opt').forEach(o => {
+          o.classList.remove('selected');
+          o.setAttribute('aria-pressed', 'false');
+        });
       }
     });
     card.querySelector('.domain-score').textContent = pd(dTotal) + ' / ' + pd(dMax);
@@ -1042,15 +1288,30 @@ function refreshAll(){
   document.getElementById('answeredStat').innerHTML = `<b>${pd(answered)} / ${pd(DATA.totalItems)}</b>`;
   const pct = Math.round((answered/DATA.totalItems)*100);
   document.getElementById('progressFill').style.width = pct + '%';
+  document.getElementById('answeredProgress')?.setAttribute('aria-valuenow', String(answered));
+  document.getElementById('scoreGauge')?.setAttribute('aria-valuenow', String(total));
 
   const band = getBandForScore(total);
-  const cls = bandColorClass(band.label);
+  const complete = answered === DATA.totalItems;
+  const cls = complete ? bandColorClass(band.label) : 'incomplete';
   const pill = document.getElementById('bandPill');
-  pill.textContent = band.label;
-  pill.style.background = `var(--${cls}-bg)`;
-  pill.style.color = `var(--${cls})`;
-
-  document.getElementById('bandAnalysis').textContent = answered>0 ? band.analysis : 'برای مشاهده تحلیل، ارزیابی را آغاز کنید.';
+  pill.className = 'band-pill ' + cls;
+  if (answered === 0){
+    pill.textContent = 'شروع نشده';
+    pill.style.background = 'var(--bg)';
+    pill.style.color = 'var(--text-mute)';
+    document.getElementById('bandAnalysis').textContent = 'برای مشاهدهٔ نتیجه، ارزیابی را آغاز کنید.';
+  } else if (!complete){
+    pill.textContent = `ارزیابی ناقص — ${pd(answered)} از ${pd(DATA.totalItems)}`;
+    pill.style.background = 'var(--bg)';
+    pill.style.color = 'var(--text)';
+    document.getElementById('bandAnalysis').textContent = 'نتیجهٔ نهایی پس از پاسخ‌دادن به همهٔ شاخص‌ها محاسبه می‌شود.';
+  } else {
+    pill.textContent = band.label;
+    pill.style.background = `var(--${cls}-bg)`;
+    pill.style.color = `var(--${cls})`;
+    document.getElementById('bandAnalysis').textContent = band.analysis;
+  }
 
   updatePrintHeader();
 
@@ -1061,13 +1322,13 @@ function refreshAll(){
   const ring = document.getElementById('gaugeRing');
   ring.style.strokeDasharray = circumference;
   ring.style.strokeDashoffset = circumference * (1-ratio);
-  ring.style.stroke = `var(--${cls})`;
+  ring.style.stroke = complete ? `var(--${cls})` : 'var(--text-mute)';
 
   // highlight current band card in guide
   document.querySelectorAll('.guide-card').forEach(c => c.classList.remove('current'));
   const idx = DATA.bands.indexOf(band);
   const gc = document.querySelector(`.guide-card[data-band-index="${idx}"]`);
-  if (gc && answered>0) gc.classList.add('current');
+  if (gc && complete) gc.classList.add('current');
 
   updateDomainRecommendations();
 }
@@ -1121,11 +1382,6 @@ function updateDomainRecommendations(){
     `;
     panel.hidden = false;
 
-    const card = panel.closest('.domain-card');
-    const body = panel.closest('.domain-body');
-    if (card && body && card.classList.contains('open')){
-      body.style.maxHeight = body.scrollHeight + 'px';
-    }
   });
 }
 
@@ -1163,7 +1419,8 @@ function applyFilter(){
     if (anyVisible && (q || statusFilter!=='all')){
       card.classList.add('open');
       const body = card.querySelector('.domain-body');
-      body.style.maxHeight = body.scrollHeight + 'px';
+      body.hidden = false;
+      card.querySelector('.domain-header').setAttribute('aria-expanded', 'true');
     }
   });
 }
@@ -1187,7 +1444,7 @@ function showToast(msg){
 
 function cloudIsConfigured(){
   // "Cloud" is now Supabase itself — available whenever the user has an active, approved profile.
-  return !!currentProfile;
+  return !!sb && !!currentProfile;
 }
 
 function assessmentRowToEntry(row){
@@ -1202,7 +1459,8 @@ function assessmentRowToEntry(row){
     answered: row.answered,
     totalItems: row.total_items,
     status: row.status,
-    savedAt: row.saved_at
+    savedAt: row.saved_at,
+    complete: Number(row.answered) === Number(row.total_items)
   };
 }
 
@@ -1220,16 +1478,38 @@ async function fetchCloudAssessments(){
 }
 
 async function saveAssessment(){
-  const name = document.getElementById('assessorName').value.trim() || 'بدون نام';
-  const city = document.getElementById('cityName').value.trim() || 'بدون نام شهر';
-  const date = document.getElementById('dateDisplay').textContent;
+  if (saveInProgress) return;
+  const name = document.getElementById('assessorName').value.trim();
+  const city = document.getElementById('cityName').value.trim();
+  const date = assessmentDate;
   const total = Object.values(scores).reduce((a,b)=>a+b,0);
   const answered = Object.keys(scores).length;
+  if (!city){
+    document.getElementById('cityName').focus();
+    showToast('نام شهر را وارد کنید');
+    return;
+  }
+  if (!name){
+    document.getElementById('assessorName').focus();
+    showToast('نام ارزیاب را وارد کنید');
+    return;
+  }
+  if (answered !== DATA.totalItems){
+    showToast(`برای ذخیرهٔ نهایی، به هر ${pd(DATA.totalItems)} شاخص پاسخ دهید؛ پیش‌نویس شما محفوظ است`);
+    return;
+  }
+  if (!cloudIsConfigured()){
+    showToast('اتصال به سامانهٔ ابری برقرار نیست');
+    return;
+  }
   const status = getBandForScore(total).label;
+  const btn = document.getElementById('saveBtn');
+  saveInProgress = true;
+  btn.disabled = true;
+  const originalLabel = btn.textContent;
+  btn.textContent = loadedAssessmentId ? '⏳ در حال به‌روزرسانی…' : '⏳ در حال ذخیره…';
   try {
-    // created_by / created_by_email are filled in automatically by the table's own defaults
-    // (auth.uid() / auth.jwt()) — the client never needs to (and cannot) set them itself.
-    const { error } = await sb.from('hc_assessments').insert({
+    const payload = {
       city,
       evaluator_name: name,
       assessment_date: date,
@@ -1239,19 +1519,33 @@ async function saveAssessment(){
       answered,
       total_items: DATA.totalItems,
       status
-    });
+    };
+    let result;
+    if (loadedAssessmentId){
+      result = await sb.from('hc_assessments').update(payload).eq('id', loadedAssessmentId);
+    } else {
+      result = await sb.from('hc_assessments').insert(payload).select('id').single();
+    }
+    const { data, error } = result;
     if (error) throw error;
-    showToast('ارزیابی در سامانه ابری ذخیره شد');
+    if (!loadedAssessmentId && data?.id) loadedAssessmentId = data.id;
+    btn.dataset.savedLabel = '💾 به‌روزرسانی ارزیابی';
+    flushDraft();
+    showToast(loadedAssessmentId ? 'ارزیابی در سامانهٔ ابری ذخیره شد' : 'ارزیابی ذخیره شد');
   } catch (error) {
     console.warn('Supabase save failed:', error);
     showToast('ذخیرهٔ ارزیابی ناموفق بود: ' + (error && error.message ? error.message : ''));
+  } finally {
+    saveInProgress = false;
+    btn.disabled = false;
+    btn.textContent = loadedAssessmentId ? '💾 به‌روزرسانی ارزیابی' : originalLabel;
   }
 }
 
 async function openLoadModal(){
   const wrap = document.getElementById('modalList');
   wrap.innerHTML = '<div class="modal-empty">در حال بارگذاری…</div>';
-  document.getElementById('modalOverlay').classList.add('show');
+  if (!document.getElementById('modalOverlay').classList.contains('show')) openDialog('modalOverlay');
 
   const rows = await fetchCloudAssessments();
   const list = (rows || []).map(assessmentRowToEntry);
@@ -1270,54 +1564,92 @@ async function openLoadModal(){
     const canDelete = currentProfile && roleLevel(currentProfile.role) >= 2;
     row.innerHTML = `
       <div>
-        <div><b>${entry.name}</b>${entry.city ? ' — ' + entry.city : ''}</div>
-        <div style="color:var(--text-mute);font-size:.78rem;">${entry.date} — امتیاز ${pd(entry.total)} از ${pd(DATA.maxScore)} (${pd(entry.answered)} پاسخ)</div>
+        <div><b>${escapeHtml(entry.name || '—')}</b>${entry.city ? ' — ' + escapeHtml(entry.city) : ''}</div>
+        <div style="color:var(--text-mute);font-size:.78rem;">${escapeHtml(entry.date || '—')} — امتیاز ${pd(entry.total)} از ${pd(DATA.maxScore)} (${pd(entry.answered)} پاسخ${entry.complete ? '' : ' — ناقص'})</div>
       </div>
       <div style="display:flex;gap:10px;align-items:center;">
-        <span class="load-btn">بارگذاری</span>
-        ${canDelete ? '<button title="حذف">🗑</button>' : ''}
+        <button class="load-btn" type="button">بارگذاری</button>
+        ${canDelete ? '<button type="button" title="حذف ارزیابی" aria-label="حذف ارزیابی">🗑</button>' : ''}
       </div>
     `;
     row.querySelector('.load-btn').onclick = () => {
       scores = {...entry.scores};
       document.getElementById('assessorName').value = entry.name;
       document.getElementById('cityName').value = entry.city || '';
+      loadedAssessmentId = entry.id || null;
+      setAssessmentDate(entry.date || '');
       buildDomains();
       refreshAll();
       applyFilter();
+      flushDraft();
       closeModal();
       showToast('ارزیابی بارگذاری شد');
     };
     const delBtn = row.querySelector('button');
-    if (delBtn){
-      delBtn.onclick = async () => {
+    const deleteBtn = row.querySelector('button[aria-label="حذف ارزیابی"]');
+    if (deleteBtn){
+      deleteBtn.onclick = async () => {
+        if (!confirm(`ارزیابی «${entry.city || 'بدون نام شهر'}» حذف شود؟ این کار قابل بازگشت نیست.`)) return;
+        deleteBtn.disabled = true;
         const { error } = await sb.from('hc_assessments').delete().eq('id', entry.id);
         if (error){
           showToast('حذف ناموفق بود: ' + (error.message || ''));
+          deleteBtn.disabled = false;
+          return;
         }
+        if (loadedAssessmentId === entry.id) loadedAssessmentId = null;
+        showToast('ارزیابی حذف شد');
         openLoadModal();
       };
     }
     wrap.appendChild(row);
   });
 }
-function closeModal(){ document.getElementById('modalOverlay').classList.remove('show'); }
+function closeModal(){ closeDialog('modalOverlay'); }
 
 function resetAll(){
   if (!confirm('همه پاسخ‌ها پاک شوند؟')) return;
+  lastResetSnapshot = getDraftPayload();
   scores = {};
+  loadedAssessmentId = null;
+  document.getElementById('cityName').value = '';
+  if (currentProfile?.name) document.getElementById('assessorName').value = currentProfile.name;
+  setAssessmentDateToday();
   buildDomains();
   refreshAll();
   applyFilter();
+  document.getElementById('saveBtn').textContent = '💾 ذخیره ارزیابی';
+  document.getElementById('undoResetBtn').hidden = false;
+  flushDraft();
+}
+
+function undoReset(){
+  if (!lastResetSnapshot) return;
+  scores = {...lastResetSnapshot.scores};
+  document.getElementById('cityName').value = lastResetSnapshot.city || '';
+  document.getElementById('assessorName').value = lastResetSnapshot.assessor || '';
+  loadedAssessmentId = lastResetSnapshot.loadedAssessmentId || null;
+  setAssessmentDate(lastResetSnapshot.date || '');
+  buildDomains();
+  refreshAll();
+  applyFilter();
+  document.getElementById('saveBtn').textContent = loadedAssessmentId ? '💾 به‌روزرسانی ارزیابی' : '💾 ذخیره ارزیابی';
+  document.getElementById('undoResetBtn').hidden = true;
+  lastResetSnapshot = null;
+  flushDraft();
+  showToast('پاک‌کردن پاسخ‌ها بازگردانده شد');
 }
 
 /* ---------------- Init ---------------- */
 document.addEventListener('DOMContentLoaded', () => {
   initAuth();
+  setAssessmentDateToday();
+  const restoredDraft = restoreDraft();
   buildDomains();
   buildGuide();
   refreshAll();
-  setAssessmentDateToday();
+  updatePrintHeader();
+  if (!restoredDraft) flushDraft();
 
   document.getElementById('searchBox').addEventListener('input', e => {
     currentSearch = e.target.value;
@@ -1325,24 +1657,48 @@ document.addEventListener('DOMContentLoaded', () => {
   });
   document.querySelectorAll('.filter-chip').forEach(chip => {
     chip.onclick = () => {
-      document.querySelectorAll('.filter-chip').forEach(c=>c.classList.remove('active'));
+      document.querySelectorAll('.filter-chip').forEach(c => {
+        c.classList.remove('active');
+        c.setAttribute('aria-pressed', 'false');
+      });
       chip.classList.add('active');
+      chip.setAttribute('aria-pressed', 'true');
       statusFilter = chip.dataset.filter;
       applyFilter();
     };
   });
 
-  document.getElementById('cityName').addEventListener('input', () => { updatePrintHeader(); });
-  document.getElementById('assessorName').addEventListener('input', () => { updatePrintHeader(); });
+  document.getElementById('cityName').addEventListener('input', () => { updatePrintHeader(); scheduleDraftSave(); });
+  document.getElementById('assessorName').addEventListener('input', () => { updatePrintHeader(); scheduleDraftSave(); });
 
   document.getElementById('saveBtn').onclick = saveAssessment;
   document.getElementById('loadBtn').onclick = openLoadModal;
   document.getElementById('resetBtn').onclick = resetAll;
+  document.getElementById('undoResetBtn').onclick = undoReset;
   document.getElementById('printBtn').onclick = () => window.print();
   document.getElementById('modalCloseBtn').onclick = closeModal;
   document.getElementById('modalOverlay').addEventListener('click', e => {
     if (e.target.id === 'modalOverlay') closeModal();
   });
+});
+
+document.addEventListener('keydown', event => {
+  trapDialogFocus(event);
+  if (event.key !== 'Escape') return;
+  const openOverlay = document.querySelector('.overlay.show');
+  if (!openOverlay) return;
+  if (openOverlay.id === 'modalOverlay') closeModal();
+  if (openOverlay.id === 'approvalsModalOverlay') closeApprovalsModal();
+  if (openOverlay.id === 'adminsModalOverlay') closeAdminsModal();
+  if (openOverlay.id === 'plansModalOverlay') closeDialog('plansModalOverlay');
+});
+
+window.addEventListener('beforeunload', event => {
+  if (draftDirty) flushDraft();
+  if (saveInProgress){
+    event.preventDefault();
+    event.returnValue = '';
+  }
 });
 
 /* =========================================================
@@ -1364,11 +1720,17 @@ const SQUASHED_LOOKUP = (() => {
   return m;
 })();
 
-const mapOverrides = new Map();
+const MAP_OVERRIDES_KEY = 'healthy-city-map-overrides-v1';
+const mapOverrides = (() => {
+  try { return new Map(Object.entries(JSON.parse(localStorage.getItem(MAP_OVERRIDES_KEY) || '{}'))); }
+  catch (error) { return new Map(); }
+})();
 function getOverride(city){ return mapOverrides.get(city) || ''; }
 function setOverride(city, slug){
   if (slug) mapOverrides.set(city, slug);
   else mapOverrides.delete(city);
+  try { localStorage.setItem(MAP_OVERRIDES_KEY, JSON.stringify(Object.fromEntries(mapOverrides))); }
+  catch (error) { /* The map still works for this session when local storage is unavailable. */ }
 }
 
 function matchProvinceSlug(cityNameRaw){
@@ -1430,7 +1792,7 @@ function buildMapSvg(){
     const d = PROVINCE_PATHS[slug];
     const faName = PROVINCE_SLUG_TO_NAME[slug] || slug;
     const baseColor = PROVINCE_BASE_COLORS[slug];
-    return `<path class="province-shape" data-slug="${slug}" data-name="${faName}" style="fill:${baseColor}" d="${d}"></path>`;
+    return `<path class="province-shape" data-slug="${slug}" data-name="${escapeHtml(faName)}" style="fill:${baseColor}" d="${d}" tabindex="0" role="button" aria-label="${escapeHtml(faName)}"></path>`;
   }).join('');
   const svg = `<svg viewBox="${MAP_VIEWBOX}" xmlns="http://www.w3.org/2000/svg">
     <g>${MAP_BORDER_SVG}</g>
@@ -1474,13 +1836,22 @@ function buildMapSvg(){
       path.classList.remove('is-hover');
       tooltip.style.display = 'none';
     });
+    path.addEventListener('focus', () => {
+      path.classList.add('is-hover');
+      const rect = path.getBoundingClientRect();
+      showTooltip(path.dataset.slug, path.dataset.name, rect.left + rect.width / 2, rect.top + rect.height / 2);
+    });
+    path.addEventListener('blur', () => {
+      path.classList.remove('is-hover');
+      tooltip.style.display = 'none';
+    });
   });
 }
 
 function showTooltip(slug, faName, x, y){
   const tooltip = document.getElementById('mapTooltip');
   const records = (window.__mapProvinceRecords && window.__mapProvinceRecords[slug]) || [];
-  let html = `<b>${faName}</b>`;
+  let html = `<b>${escapeHtml(faName)}</b>`;
   if (!records.length){
     html += `<div class="tt-empty">هنوز شهری از این استان ارزیابی نشده است.</div>`;
   } else {
@@ -1488,7 +1859,7 @@ function showTooltip(slug, faName, x, y){
       .slice()
       .sort((a,b) => b.totalScore - a.totalScore)
       .forEach(r => {
-        html += `<div class="tt-row"><span>${r.city}</span><span>${pd(r.totalScore)}/${pd(DATA.maxScore)}</span></div>`;
+        html += `<div class="tt-row"><span>${escapeHtml(r.city)}</span><span>${pd(r.totalScore)}/${pd(DATA.maxScore)}</span></div>`;
       });
   }
   tooltip.innerHTML = html;
@@ -1536,6 +1907,7 @@ async function gatherAllRecords(){
   }
   // Rows are sorted newest-first, so the first time we see a city is its most recent assessment.
   rows.forEach(row => {
+    if (Number(row.answered) !== Number(row.total_items)) return;
     const city = row.city || 'بدون نام شهر';
     if (!(city in byCity)){
       byCity[city] = assessmentRowToEntry(row);
@@ -1553,8 +1925,8 @@ function renderUnmatchedPanel(unmatched){
     .map(slug => `<option value="${slug}">${PROVINCE_SLUG_TO_NAME[slug]}</option>`).join('');
   list.innerHTML = unmatched.map(r => `
     <div class="unmatched-row">
-      <div><span class="u-name">${r.city}</span><span class="u-score">${pd(r.totalScore)}/${pd(DATA.maxScore)} — ${r.status||''}</span></div>
-      <select data-city="${r.city.replace(/"/g,'&quot;')}">
+      <div><span class="u-name">${escapeHtml(r.city)}</span><span class="u-score">${pd(r.totalScore)}/${pd(DATA.maxScore)} — ${escapeHtml(r.status||'')}</span></div>
+      <select data-city="${escapeHtml(r.city)}" aria-label="انتخاب استان برای ${escapeHtml(r.city)}">
         <option value="">— انتخاب استان —</option>
         ${options}
       </select>
@@ -1566,6 +1938,31 @@ function renderUnmatchedPanel(unmatched){
       refreshMap();
     });
   });
+}
+
+function renderMapAccessibleTable(provinceRecords, unmatched){
+  const wrap = document.getElementById('mapAccessibleTable');
+  const rows = Object.keys(provinceRecords).sort((a, b) =>
+    (PROVINCE_SLUG_TO_NAME[a] || a).localeCompare(PROVINCE_SLUG_TO_NAME[b] || b, 'fa')
+  ).map(slug => {
+    const records = provinceRecords[slug];
+    const avg = records.reduce((sum, record) => sum + record.totalScore, 0) / records.length;
+    return `<tr><th scope="row">${escapeHtml(PROVINCE_SLUG_TO_NAME[slug] || slug)}</th><td>${pd(records.length)}</td><td>${pd(Math.round(avg))} از ${pd(DATA.maxScore)}</td><td>${records.map(r => escapeHtml(r.city)).join('، ')}</td></tr>`;
+  });
+  unmatched.forEach(record => {
+    rows.push(`<tr><th scope="row">استان تعیین‌نشده</th><td>۱</td><td>${pd(record.totalScore)} از ${pd(DATA.maxScore)}</td><td>${escapeHtml(record.city)}</td></tr>`);
+  });
+  wrap.innerHTML = rows.length ? `
+    <details>
+      <summary>جدول متنی داده‌های نقشه</summary>
+      <div class="accessible-table-wrap">
+        <table>
+          <caption class="sr-only">امتیاز ارزیابی شهرها به تفکیک استان</caption>
+          <thead><tr><th scope="col">استان</th><th scope="col">تعداد شهر</th><th scope="col">میانگین امتیاز</th><th scope="col">شهرها</th></tr></thead>
+          <tbody>${rows.join('')}</tbody>
+        </table>
+      </div>
+    </details>` : '';
 }
 
 async function refreshMap(){
@@ -1593,6 +1990,7 @@ async function refreshMap(){
     window.__mapProvinceRecords = provinceRecords;
     colorMap(provinceRecords);
     renderUnmatchedPanel(unmatched);
+    renderMapAccessibleTable(provinceRecords, unmatched);
 
     const total = Object.keys(byCity).length;
     if (cloudFailed){
@@ -1623,10 +2021,16 @@ const mapView = document.getElementById('mapView');
 const compareView = document.getElementById('compareView');
 const reportView = document.getElementById('reportView');
 function activateTab(activeBtn, activeView){
-  [tabAssessBtn, tabMapBtn, tabCompareBtn, tabReportBtn].forEach(b => b.classList.remove('is-active'));
-  [assessmentView, mapView, compareView, reportView].forEach(v => v.style.display = 'none');
+  [tabAssessBtn, tabMapBtn, tabCompareBtn, tabReportBtn].forEach(b => {
+    b.classList.remove('is-active');
+    b.setAttribute('aria-selected', 'false');
+    b.tabIndex = -1;
+  });
+  [assessmentView, mapView, compareView, reportView].forEach(v => { v.hidden = true; });
   activeBtn.classList.add('is-active');
-  activeView.style.display = '';
+  activeBtn.setAttribute('aria-selected', 'true');
+  activeBtn.tabIndex = 0;
+  activeView.hidden = false;
 }
 tabAssessBtn.addEventListener('click', () => {
   activateTab(tabAssessBtn, assessmentView);
@@ -1644,6 +2048,21 @@ tabReportBtn.addEventListener('click', () => {
   loadReportRecords();
 });
 
+document.querySelector('.view-tabs[role="tablist"]').addEventListener('keydown', event => {
+  const tabs = [tabAssessBtn, tabMapBtn, tabCompareBtn, tabReportBtn].filter(tab => tab.style.display !== 'none');
+  const current = tabs.indexOf(document.activeElement);
+  if (current < 0) return;
+  let next = current;
+  if (event.key === 'ArrowLeft') next = (current + 1) % tabs.length;
+  else if (event.key === 'ArrowRight') next = (current - 1 + tabs.length) % tabs.length;
+  else if (event.key === 'Home') next = 0;
+  else if (event.key === 'End') next = tabs.length - 1;
+  else return;
+  event.preventDefault();
+  tabs[next].focus();
+  tabs[next].click();
+});
+
 /* =========================================================
    Compare cities (added feature)
    ========================================================= */
@@ -1651,7 +2070,7 @@ let compareRecordsCache = [];
 
 async function gatherCompareRecords(){
   const rows = await fetchCloudAssessments();
-  const records = (rows || []).map(assessmentRowToEntry);
+  const records = (rows || []).map(assessmentRowToEntry).filter(record => record.complete);
   records.sort((a, b) => (b.date || '').localeCompare(a.date || '') || b.total - a.total);
   return records;
 }
@@ -1673,7 +2092,7 @@ async function loadCompareRecords(){
     compareRecordsCache = [];
   }
   const options = ['<option value="">— انتخاب ارزیابی —</option>']
-    .concat(compareRecordsCache.map((r, i) => `<option value="${i}">${compareOptionLabel(r)}</option>`))
+    .concat(compareRecordsCache.map((r, i) => `<option value="${i}">${escapeHtml(compareOptionLabel(r))}</option>`))
     .join('');
   selA.innerHTML = options;
   selB.innerHTML = options;
@@ -1715,7 +2134,7 @@ function renderCompare(){
   let winnerHtml;
   if (a.total !== b.total){
     const winner = a.total > b.total ? a : b;
-    winnerHtml = `<div class="compare-winner">🏆 ${winner.city} با اختلاف ${pd(Math.abs(a.total - b.total))} امتیاز، وضعیت بهتری دارد</div>`;
+    winnerHtml = `<div class="compare-winner">🏆 ${escapeHtml(winner.city)} با اختلاف ${pd(Math.abs(a.total - b.total))} امتیاز، وضعیت بهتری دارد</div>`;
   } else {
     winnerHtml = `<div class="compare-winner">امتیاز کلی دو شهر برابر است</div>`;
   }
@@ -1723,19 +2142,19 @@ function renderCompare(){
   const summaryHtml = `
     <div class="compare-summary">
       <div class="compare-summary-card">
-        <h3>${a.city}</h3>
-        <div class="csc-meta">${a.name ? a.name + ' — ' : ''}${a.date || '—'}</div>
+        <h3>${escapeHtml(a.city)}</h3>
+        <div class="csc-meta">${a.name ? escapeHtml(a.name) + ' — ' : ''}${escapeHtml(a.date || '—')}</div>
         <div class="csc-score">${pd(a.total)}</div>
         <div class="csc-max">از ${pd(a.maxScore)}</div>
-        <div class="csc-band" style="background:var(--${clsA}-bg);color:var(--${clsA});">${bandA.label}</div>
+        <div class="csc-band" style="background:var(--${clsA}-bg);color:var(--${clsA});">${escapeHtml(bandA.label)}</div>
         <div class="csc-answered">${pd(a.answered)} از ${pd(a.totalItems)} شاخص پاسخ داده شده</div>
       </div>
       <div class="compare-summary-card">
-        <h3>${b.city}</h3>
-        <div class="csc-meta">${b.name ? b.name + ' — ' : ''}${b.date || '—'}</div>
+        <h3>${escapeHtml(b.city)}</h3>
+        <div class="csc-meta">${b.name ? escapeHtml(b.name) + ' — ' : ''}${escapeHtml(b.date || '—')}</div>
         <div class="csc-score">${pd(b.total)}</div>
         <div class="csc-max">از ${pd(b.maxScore)}</div>
-        <div class="csc-band" style="background:var(--${clsB}-bg);color:var(--${clsB});">${bandB.label}</div>
+        <div class="csc-band" style="background:var(--${clsB}-bg);color:var(--${clsB});">${escapeHtml(bandB.label)}</div>
         <div class="csc-answered">${pd(b.answered)} از ${pd(b.totalItems)} شاخص پاسخ داده شده</div>
       </div>
     </div>
@@ -1752,13 +2171,13 @@ function renderCompare(){
         <div class="compare-domain-title"><span>${dm.icon}</span><span>${dm.title}</span></div>
         <div class="compare-domain-bars">
           <div class="cdb-line">
-            <span class="cdb-label">${a.city}</span>
-            <div class="cdb-track"><div class="cdb-fill a" style="width:${pctA}%;"></div></div>
+            <span class="cdb-label">${escapeHtml(a.city)}</span>
+            <div class="cdb-track" role="progressbar" aria-label="${escapeHtml(a.city)}، ${escapeHtml(dm.title)}" aria-valuemin="0" aria-valuemax="${da.max}" aria-valuenow="${da.total}"><div class="cdb-fill a" style="width:${pctA}%;"></div></div>
             <span class="cdb-val">${pd(da.total)} / ${pd(da.max)}</span>
           </div>
           <div class="cdb-line">
-            <span class="cdb-label">${b.city}</span>
-            <div class="cdb-track"><div class="cdb-fill b" style="width:${pctB}%;"></div></div>
+            <span class="cdb-label">${escapeHtml(b.city)}</span>
+            <div class="cdb-track" role="progressbar" aria-label="${escapeHtml(b.city)}، ${escapeHtml(dm.title)}" aria-valuemin="0" aria-valuemax="${db.max}" aria-valuenow="${db.total}"><div class="cdb-fill b" style="width:${pctB}%;"></div></div>
             <span class="cdb-val">${pd(db.total)} / ${pd(db.max)}</span>
           </div>
         </div>
@@ -1819,13 +2238,20 @@ async function loadReportRecords(){
     <div class="report-city-item">
       <span class="rci-swatch" style="background:${reportPaletteColor(i)};"></span>
       <input type="checkbox" id="reportCity${i}" value="${i}">
-      <label for="reportCity${i}">${svgEscape(compareOptionLabel(r))}</label>
+      <label for="reportCity${i}">${escapeHtml(compareOptionLabel(r))}</label>
     </div>
   `).join('');
 
   listEl.querySelectorAll('input[type="checkbox"]').forEach(cb => {
     if (prevChecked.has(cb.value)) cb.checked = true;
-    cb.addEventListener('change', renderReportChart);
+    cb.addEventListener('change', () => {
+      const selected = listEl.querySelectorAll('input[type="checkbox"]:checked');
+      if (selected.length > MAX_REPORT_RECORDS){
+        cb.checked = false;
+        showToast(`حداکثر ${pd(MAX_REPORT_RECORDS)} ارزیابی را هم‌زمان انتخاب کنید`);
+      }
+      renderReportChart();
+    });
   });
 
   // Default: if nothing was previously selected, pre-check the first two records.
@@ -1842,6 +2268,7 @@ async function loadReportRecords(){
 function getSelectedReportRecords(){
   const listEl = document.getElementById('reportCityList');
   return Array.from(listEl.querySelectorAll('input[type="checkbox"]:checked'))
+    .slice(0, MAX_REPORT_RECORDS)
     .map(cb => reportRecordsCache[Number(cb.value)])
     .filter(Boolean);
 }
@@ -1894,7 +2321,7 @@ function buildScoreChartSVG(records){
     `;
   });
 
-  return `<svg viewBox="0 0 ${w} ${h}" xmlns="http://www.w3.org/2000/svg">
+  return `<svg viewBox="0 0 ${w} ${h}" width="${w}" height="${h}" role="img" aria-label="نمودار مقایسهٔ امتیاز کل شهرهای انتخاب‌شده" xmlns="http://www.w3.org/2000/svg">
     ${bandRects}
     ${gridLines}
     <line x1="${padL}" y1="${padT}" x2="${padL}" y2="${padT + plotH}" stroke="#5B6D66" stroke-width="1"></line>
@@ -1941,7 +2368,7 @@ function buildDomainChartSVG(records){
     `;
   });
 
-  return `<svg viewBox="0 0 ${w} ${h}" xmlns="http://www.w3.org/2000/svg">
+  return `<svg viewBox="0 0 ${w} ${h}" width="${w}" height="${h}" role="img" aria-label="نمودار مقایسهٔ حوزه‌های ارزیابی شهرهای انتخاب‌شده" xmlns="http://www.w3.org/2000/svg">
     ${gridLines}
     <line x1="${padL}" y1="${padT}" x2="${padL}" y2="${padT + plotH}" stroke="#5B6D66" stroke-width="1"></line>
     <line x1="${padL}" y1="${padT + plotH}" x2="${padL + plotW}" y2="${padT + plotH}" stroke="#5B6D66" stroke-width="1"></line>
@@ -1959,23 +2386,42 @@ function renderReportChart(){
   }
 
   const legendHtml = buildReportLegendHtml(records);
+  const tableRows = records.map(record => {
+    const domainCells = DATA.domains.map(domain => {
+      const score = domainScoreFor(record.scores, domain);
+      return `<td>${pd(score.total)} از ${pd(score.max)}</td>`;
+    }).join('');
+    return `<tr><th scope="row">${escapeHtml(record.city)}</th><td>${pd(record.total)} از ${pd(record.maxScore)}</td>${domainCells}</tr>`;
+  }).join('');
+  const accessibleTable = `
+    <details>
+      <summary>جدول داده‌های نمودار</summary>
+      <div class="accessible-table-wrap">
+        <table>
+          <caption class="sr-only">مقایسهٔ امتیاز کل و حوزه‌های ارزیابی شهرها</caption>
+          <thead><tr><th scope="col">شهر</th><th scope="col">امتیاز کل</th>${DATA.domains.map((domain, index) => `<th scope="col" title="${escapeHtml(domain.title)}">حوزه ${pd(index + 1)}</th>`).join('')}</tr></thead>
+          <tbody>${tableRows}</tbody>
+        </table>
+      </div>
+    </details>`;
 
   area.innerHTML = `
     <div class="report-chart-card">
       <h4>مقایسهٔ امتیاز کل شهرها</h4>
-      ${buildScoreChartSVG(records)}
+      <div class="report-chart-scroll">${buildScoreChartSVG(records)}</div>
       ${legendHtml}
     </div>
     <div class="report-chart-card">
       <h4>مقایسهٔ درصد پیشرفت به تفکیک حوزه (نشانگر ماوس روی هر ستون، نام حوزه را نشان می‌دهد)</h4>
-      ${buildDomainChartSVG(records)}
+      <div class="report-chart-scroll">${buildDomainChartSVG(records)}</div>
       ${legendHtml}
     </div>
+    ${accessibleTable}
   `;
 }
 
 document.getElementById('reportSelectAllBtn').addEventListener('click', () => {
-  document.querySelectorAll('#reportCityList input[type="checkbox"]').forEach(cb => { cb.checked = true; });
+  document.querySelectorAll('#reportCityList input[type="checkbox"]').forEach((cb, index) => { cb.checked = index < MAX_REPORT_RECORDS; });
   renderReportChart();
 });
 document.getElementById('reportClearBtn').addEventListener('click', () => {
@@ -1990,9 +2436,9 @@ document.getElementById('reportRefreshBtn').addEventListener('click', loadReport
 const SUPABASE_URL = 'https://ulhlmzvgiaofrclfvoox.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_Tw8e07GmeCKW79HgMPLKSw_ydgLdC99';
 const PROFILE_TABLE = 'hc_profiles';
-const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const sb = window.supabase?.createClient ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
 
-sb.auth.onAuthStateChange((event, session) => {
+sb?.auth?.onAuthStateChange((event, session) => {
   if (event === 'PASSWORD_RECOVERY'){
     renderLoginStage('reset-password');
     showLoginOverlay();
@@ -2023,8 +2469,19 @@ function isValidNationalId(code){
   return (remainder < 2 && check === remainder) || (remainder >= 2 && check === (11 - remainder));
 }
 
-function showLoginOverlay(){ document.getElementById('loginOverlay').style.display = 'flex'; }
-function hideLoginOverlay(){ document.getElementById('loginOverlay').style.display = 'none'; }
+function showLoginOverlay(){
+  const overlay = document.getElementById('loginOverlay');
+  overlay.style.display = 'flex';
+  overlay.setAttribute('aria-hidden', 'false');
+  document.getElementById('app').inert = true;
+  requestAnimationFrame(() => overlay.querySelector('input:not([type="hidden"]), button')?.focus());
+}
+function hideLoginOverlay(){
+  const overlay = document.getElementById('loginOverlay');
+  overlay.style.display = 'none';
+  overlay.setAttribute('aria-hidden', 'true');
+  document.getElementById('app').inert = false;
+}
 
 function showLoginError(msg){
   const errEl = document.getElementById('loginError');
@@ -2077,6 +2534,7 @@ function renderLoginStage(stage){
   const submitBtn = document.getElementById('loginSubmitBtn');
   const signinTab = document.getElementById('loginTabSignin');
   const signupTab = document.getElementById('loginTabSignup');
+  const passwordInput = document.getElementById('loginPassword');
 
   // Defaults; each branch below only overrides what differs.
   tabs.style.display = 'none';
@@ -2090,6 +2548,9 @@ function renderLoginStage(stage){
   confirmPasswordField.style.display = 'none';
   backToSigninWrap.style.display = 'none';
   note.style.display = 'none';
+  signinTab.setAttribute('aria-selected', String(stage === 'signin'));
+  signupTab.setAttribute('aria-selected', String(stage === 'signup'));
+  passwordInput.autocomplete = stage === 'signup' ? 'new-password' : 'current-password';
 
   if (stage === 'signin'){
     tabs.style.display = '';
@@ -2193,11 +2654,16 @@ function finalizeProfileAccess(profile, email){
   }
   hideAccountStatusBlock();
   currentProfile = profile;
+  discardDraftFromAnotherAccount(email);
   hideLoginOverlay();
   updateUserInfoUI(profile, email);
   applyAccessControl(profile);
   const assessorInput = document.getElementById('assessorName');
-  if (assessorInput && !assessorInput.value.trim()) assessorInput.value = profile.name;
+  if (assessorInput && !assessorInput.value.trim()){
+    assessorInput.value = profile.name;
+    updatePrintHeader();
+    scheduleDraftSave();
+  }
   return true;
 }
 
@@ -2219,6 +2685,10 @@ async function handleAuthenticatedSession(session){
 async function submitLogin(){
   clearLoginError();
   const submitBtn = document.getElementById('loginSubmitBtn');
+  if (!sb){
+    showLoginError('کتابخانهٔ اتصال بارگذاری نشد. اتصال اینترنت را بررسی و صفحه را دوباره باز کنید.');
+    return;
+  }
   submitBtn.disabled = true;
   try {
     if (loginStage === 'signin'){
@@ -2310,6 +2780,13 @@ async function submitLogin(){
 
 async function initAuth(){
   applyAccessControl(null);
+  if (!sb){
+    renderLoginStage('signin');
+    showLoginOverlay();
+    showLoginError('اتصال امن به سامانه در دسترس نیست. اتصال اینترنت را بررسی و صفحه را دوباره بارگذاری کنید.');
+    document.getElementById('loginSubmitBtn').disabled = true;
+    return;
+  }
   const recoveryHint = (window.location.hash || '') + (window.location.search || '');
   if (recoveryHint.includes('type=recovery')){
     // Don't auto-grant access on a recovery link — the onAuthStateChange PASSWORD_RECOVERY
@@ -2343,7 +2820,9 @@ document.querySelectorAll('.login-field input').forEach(inp => {
   inp.addEventListener('keydown', e => { if (e.key === 'Enter') submitLogin(); });
 });
 async function performLogout(){
-  await sb.auth.signOut();
+  clearTimeout(draftTimer);
+  flushDraft();
+  if (sb) await sb.auth.signOut();
   currentProfile = null;
   currentAuthEmail = null;
   pendingAuthUser = null;
@@ -2373,7 +2852,7 @@ async function loadApprovalsList(){
     .eq('status', 'pending')
     .order('created_at', { ascending: true });
   if (error){
-    wrap.innerHTML = '<div class="modal-empty">خطا در بارگذاری فهرست: ' + (error.message || '') + '</div>';
+    wrap.innerHTML = '<div class="modal-empty">خطا در بارگذاری فهرست: ' + escapeHtml(error.message || '') + '</div>';
     return;
   }
   if (!data || data.length === 0){
@@ -2386,12 +2865,12 @@ async function loadApprovalsList(){
     item.className = 'approval-item';
     item.innerHTML = `
       <div class="ai-meta">
-        <b>${row.name || '—'}</b> — ${row.role}<br>
-        ${row.email || ''}${row.national_id ? ' — کد ملی: ' + row.national_id : ''}
+        <b>${escapeHtml(row.name || '—')}</b> — ${escapeHtml(row.role || '—')}<br>
+        ${escapeHtml(row.email || '')}${row.national_id ? ' — کد ملی: ' + maskNationalId(row.national_id) : ''}
       </div>
       <div class="ai-actions">
-        <button class="ai-approve">تأیید</button>
-        <button class="ai-reject">رد</button>
+        <button class="ai-approve" type="button">تأیید</button>
+        <button class="ai-reject" type="button">رد</button>
       </div>
     `;
     item.querySelector('.ai-approve').onclick = () => reviewSignup(row.id, 'active');
@@ -2413,11 +2892,11 @@ async function reviewSignup(targetId, decision){
 }
 
 function openApprovalsModal(){
-  document.getElementById('approvalsModalOverlay').classList.add('show');
+  openDialog('approvalsModalOverlay');
   loadApprovalsList();
 }
 function closeApprovalsModal(){
-  document.getElementById('approvalsModalOverlay').classList.remove('show');
+  closeDialog('approvalsModalOverlay');
 }
 document.getElementById('adminApprovalsBtn').addEventListener('click', openApprovalsModal);
 document.getElementById('approvalsModalCloseBtn').addEventListener('click', closeApprovalsModal);
@@ -2440,8 +2919,17 @@ document.getElementById('uploadPlanFileInput').addEventListener('change', async 
   const file = e.target.files && e.target.files[0];
   e.target.value = ''; // allow re-selecting the same file next time
   if (!file) return;
-  if (file.type !== 'application/pdf'){
+  if (file.type !== 'application/pdf' && !/\.pdf$/i.test(file.name)){
     showToast('لطفاً فقط فایل PDF انتخاب کنید');
+    return;
+  }
+  if (file.size > MAX_PLAN_FILE_SIZE){
+    showToast('حجم فایل PDF باید حداکثر ۲۵ مگابایت باشد');
+    return;
+  }
+  const signature = new TextDecoder('ascii').decode(await file.slice(0, 5).arrayBuffer());
+  if (signature !== '%PDF-'){
+    showToast('ساختار فایل معتبر نیست؛ یک PDF واقعی انتخاب کنید');
     return;
   }
   if (currentAccessLevel < 2){
@@ -2488,7 +2976,7 @@ async function loadPlansCityFolders(){
   const { data, error } = await sb.storage.from('operational-plans')
     .list('', { limit: 200, sortBy: { column: 'name', order: 'asc' } });
   if (error){
-    wrap.innerHTML = '<div class="modal-empty">خطا در بارگذاری فهرست: ' + (error.message || '') + '</div>';
+    wrap.innerHTML = '<div class="modal-empty">خطا در بارگذاری فهرست: ' + escapeHtml(error.message || '') + '</div>';
     return;
   }
   // Supabase Storage represents a common prefix ("folder") as an entry with id === null.
@@ -2501,7 +2989,7 @@ async function loadPlansCityFolders(){
   folders.forEach(f => {
     const row = document.createElement('div');
     row.className = 'modal-item';
-    row.innerHTML = `<div><b>🏙️ ${f.name}</b></div><span class="load-btn">مشاهده فایل‌ها</span>`;
+    row.innerHTML = `<div><b>🏙️ ${escapeHtml(f.name)}</b></div><button class="load-btn" type="button">مشاهده فایل‌ها</button>`;
     row.querySelector('.load-btn').onclick = () => openPlansCityFolder(f.name);
     wrap.appendChild(row);
   });
@@ -2514,7 +3002,7 @@ async function openPlansCityFolder(cityName){
   const { data, error } = await sb.storage.from('operational-plans')
     .list(cityName, { limit: 200, sortBy: { column: 'created_at', order: 'desc' } });
   if (error){
-    wrap.innerHTML = '<div class="modal-empty">خطا در بارگذاری فایل‌ها: ' + (error.message || '') + '</div>';
+    wrap.innerHTML = '<div class="modal-empty">خطا در بارگذاری فایل‌ها: ' + escapeHtml(error.message || '') + '</div>';
     return;
   }
   const files = (data || []).filter(item => item.id !== null);
@@ -2531,16 +3019,16 @@ async function openPlansCityFolder(cityName){
     row.className = 'modal-item';
     row.innerHTML = `
       <div>
-        <div><b>${file.name}</b></div>
-        <div style="color:var(--text-mute);font-size:.78rem;">${uploadedAt}${sizeKb ? ' — ' + sizeKb : ''}</div>
+        <div><b>${escapeHtml(file.name)}</b></div>
+        <div style="color:var(--text-mute);font-size:.78rem;">${escapeHtml(uploadedAt)}${sizeKb ? ' — ' + escapeHtml(sizeKb) : ''}</div>
       </div>
       <div style="display:flex;gap:10px;align-items:center;">
-        <span class="load-btn">دانلود</span>
-        ${currentAccessLevel >= 3 ? '<button title="حذف">🗑</button>' : ''}
+        <button class="load-btn" type="button">دانلود</button>
+        ${currentAccessLevel >= 3 ? '<button type="button" title="حذف فایل" aria-label="حذف فایل">🗑</button>' : ''}
       </div>
     `;
     row.querySelector('.load-btn').onclick = () => downloadPlanFile(fullPath, file.name);
-    const delBtn = row.querySelector('button');
+    const delBtn = row.querySelector('button[aria-label="حذف فایل"]');
     if (delBtn){
       delBtn.onclick = () => deletePlanFile(fullPath, cityName);
     }
@@ -2582,20 +3070,21 @@ document.getElementById('viewPlansBtn').addEventListener('click', () => {
     showToast('این قابلیت فقط برای کارشناس مسئول دانشگاه و کارشناس سطح ملی در دسترس است');
     return;
   }
-  document.getElementById('plansModalOverlay').classList.add('show');
+  openDialog('plansModalOverlay');
   loadPlansCityFolders();
 });
 document.getElementById('plansModalCloseBtn').addEventListener('click', () => {
-  document.getElementById('plansModalOverlay').classList.remove('show');
+  closeDialog('plansModalOverlay');
 });
 document.getElementById('plansModalOverlay').addEventListener('click', e => {
-  if (e.target.id === 'plansModalOverlay') document.getElementById('plansModalOverlay').classList.remove('show');
+  if (e.target.id === 'plansModalOverlay') closeDialog('plansModalOverlay');
 });
 document.getElementById('plansBackBtn').addEventListener('click', loadPlansCityFolders);
 
 /* ---------------- CSV export (level 2+) ---------------- */
 function csvEscape(value){
-  const s = (value === null || value === undefined) ? '' : String(value);
+  let s = (value === null || value === undefined) ? '' : String(value);
+  if (/^[=+\-@]/.test(s)) s = "'" + s;
   if (/[",\n]/.test(s)){
     return '"' + s.replace(/"/g, '""') + '"';
   }
@@ -2676,7 +3165,7 @@ async function loadAdminsList(){
     .eq('is_admin', true)
     .order('email', { ascending: true });
   if (error){
-    wrap.innerHTML = '<div class="modal-empty">خطا در بارگذاری فهرست: ' + (error.message || '') + '</div>';
+    wrap.innerHTML = '<div class="modal-empty">خطا در بارگذاری فهرست: ' + escapeHtml(error.message || '') + '</div>';
     return;
   }
   if (!data || data.length === 0){
@@ -2689,11 +3178,11 @@ async function loadAdminsList(){
     item.className = 'approval-item';
     item.innerHTML = `
       <div class="ai-meta">
-        <b>${row.name || '—'}</b> — ${row.role}<br>
-        ${row.email || ''}
+        <b>${escapeHtml(row.name || '—')}</b> — ${escapeHtml(row.role || '—')}<br>
+        ${escapeHtml(row.email || '')}
       </div>
       <div class="ai-actions">
-        <button class="ai-reject">لغو دسترسی</button>
+        <button class="ai-reject" type="button">لغو دسترسی</button>
       </div>
     `;
     item.querySelector('.ai-reject').onclick = () => revokeAdmin(row.email);
@@ -2741,11 +3230,11 @@ async function revokeAdmin(email){
 function openAdminsModal(){
   document.getElementById('adminsPanelError').style.display = 'none';
   document.getElementById('grantAdminEmail').value = '';
-  document.getElementById('adminsModalOverlay').classList.add('show');
+  openDialog('adminsModalOverlay', '#grantAdminEmail');
   loadAdminsList();
 }
 function closeAdminsModal(){
-  document.getElementById('adminsModalOverlay').classList.remove('show');
+  closeDialog('adminsModalOverlay');
 }
 document.getElementById('adminsPanelBtn').addEventListener('click', openAdminsModal);
 document.getElementById('adminsModalCloseBtn').addEventListener('click', closeAdminsModal);
